@@ -7,7 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		7815CE121AC98E5F00BE0EA1 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7815CE111AC98E5F00BE0EA1 /* main.cpp */; };
+		7849A9241AC9D0B300F68AD3 /* lodepng.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7849A9231AC9D0B300F68AD3 /* lodepng.cpp */; };
+		7849A9261AC9D0F800F68AD3 /* TestRunner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7849A9251AC9D0F800F68AD3 /* TestRunner.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,10 +25,12 @@
 
 /* Begin PBXFileReference section */
 		7815CE0E1AC98E5F00BE0EA1 /* RobotVisionTracker */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = RobotVisionTracker; sourceTree = BUILT_PRODUCTS_DIR; };
-		7815CE111AC98E5F00BE0EA1 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		7815CE181AC98E8800BE0EA1 /* AsteroidRejector.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AsteroidRejector.h; sourceTree = "<group>"; };
 		7815CE191AC9910300BE0EA1 /* RobotVisionTracker.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RobotVisionTracker.h; sourceTree = "<group>"; };
 		7815CE1A1AC991B000BE0EA1 /* stdc++.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "stdc++.h"; sourceTree = "<group>"; };
+		7849A9221AC9D04F00F68AD3 /* lodepng.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = lodepng.h; path = lodepng/lodepng.h; sourceTree = "<group>"; };
+		7849A9231AC9D0B300F68AD3 /* lodepng.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lodepng.cpp; path = lodepng/lodepng.cpp; sourceTree = "<group>"; };
+		7849A9251AC9D0F800F68AD3 /* TestRunner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestRunner.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,12 +63,22 @@
 		7815CE101AC98E5F00BE0EA1 /* RobotVisionTracker */ = {
 			isa = PBXGroup;
 			children = (
-				7815CE111AC98E5F00BE0EA1 /* main.cpp */,
+				7849A9211AC9D03400F68AD3 /* lodepng */,
 				7815CE1A1AC991B000BE0EA1 /* stdc++.h */,
 				7815CE181AC98E8800BE0EA1 /* AsteroidRejector.h */,
 				7815CE191AC9910300BE0EA1 /* RobotVisionTracker.h */,
+				7849A9251AC9D0F800F68AD3 /* TestRunner.cpp */,
 			);
 			path = RobotVisionTracker;
+			sourceTree = "<group>";
+		};
+		7849A9211AC9D03400F68AD3 /* lodepng */ = {
+			isa = PBXGroup;
+			children = (
+				7849A9221AC9D04F00F68AD3 /* lodepng.h */,
+				7849A9231AC9D0B300F68AD3 /* lodepng.cpp */,
+			);
+			name = lodepng;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -124,7 +137,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7815CE121AC98E5F00BE0EA1 /* main.cpp in Sources */,
+				7849A9261AC9D0F800F68AD3 /* TestRunner.cpp in Sources */,
+				7849A9241AC9D0B300F68AD3 /* lodepng.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -238,6 +252,7 @@
 				7815CE171AC98E5F00BE0EA1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
