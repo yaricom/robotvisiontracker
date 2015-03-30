@@ -47,20 +47,6 @@ using namespace std;
 
 template<class T> void print(VC < T > v) {cerr << "[";if (v.size()) cerr << v[0];FOR(i, 1, v.size()) cerr << ", " << v[i];cerr << "]" << endl;}
 template<class T> void printWithIndex(VC < T > v) {cerr << "[";if (v.size()) cerr << "0:" <<  v[0];FOR(i, 1, v.size()) cerr << ", " << i << ":" <<  v[i];cerr << "]" << endl;}
-inline VS splt(string s, char c = ',') {
-    VS all;
-    int p = 0, np;
-    while (np = (int)s.find(c, p), np >= 0) {
-        if (np != p)
-            all.push_back(s.substr(p, np - p));
-        else
-            all.push_back("");
-        p = np + 1;
-    }
-    if (p < s.size())
-        all.push_back(s.substr(p));
-    return all;
-}
 
 #ifdef LOCAL
 static bool LOG_DEBUG = true;
@@ -223,6 +209,17 @@ struct MT_RNG {
         y ^= (y << 15) & 0xEFC60000U;
         y ^= (y >> 18);
         return(y);
+    }
+    inline int nextInt() {
+        return randomMT();
+    }
+    
+    inline int nextInt(int x) {
+        return randomMT() % x;
+    }
+    
+    inline int nextInt(int a, int b) {
+        return a + (randomMT() % (b - a));
     }
     
 #define MAX_UINT_COKUS 4294967295  //basically 2^32-1
@@ -596,6 +593,7 @@ public:
         
         // copy data
         double X[n_size * p_size], Y[n_size];
+        
         int dimx[2];
         dimx[0] = n_size;
         dimx[1] = p_size;
@@ -604,7 +602,8 @@ public:
             for (int j = 0; j < p_size; j++){
                 if (ncat[i] == 1) {
                     // just ordinary numeric feature
-                    X[i * p_size + j] = input_X[i][j];
+                    double fval = input_X[i][j];
+                    X[i * p_size + j] = fval;
                 } else {
                     // store mapped value
                     int val = input_X[i][j];
@@ -1745,11 +1744,11 @@ private:
     }
 };
 
-#define SAMPLE_SIZE 32
-#define SAMPLE_SIZE_DIV_2 SAMPLE_SIZE/2
-#define SAMPLE_SIZE_POW SAMPLE_SIZE*SAMPLE_SIZE
-#define XSAMPLES 640/SAMPLE_SIZE
-#define YSAMPLES 480/SAMPLE_SIZE
+const static int SAMPLE_SIZE = 32;
+const static int SAMPLE_SIZE_DIV_2 = SAMPLE_SIZE / 2;
+const static int SAMPLE_SIZE_POW = SAMPLE_SIZE * SAMPLE_SIZE;
+const static int XSAMPLES = 640 / SAMPLE_SIZE;
+const static int YSAMPLES = 480 / SAMPLE_SIZE;
 
 VD extractSample(const VI &img, const int x, const int y) {
     VD res(SAMPLE_SIZE_POW, 0);
@@ -1767,13 +1766,15 @@ VD extractSample(const VI &img, const int x, const int y) {
 
 void extractSamples(const VI &img, const int ooiX, const int ooiY, VVD &features, VD &dv) {
     bool hasOOI = ooiX > 0 && ooiY > 0;
-    for (int ys = 0; ys < SAMPLE_SIZE; ys++) {
-        for (int xs = 0; xs < SAMPLE_SIZE; xs++) {
+    for (int ys = 0; ys < YSAMPLES; ys++) {
+        for (int xs = 0; xs < XSAMPLES; xs++) {
             VD sample = extractSample(img, xs * SAMPLE_SIZE, ys * SAMPLE_SIZE);
+            features.push_back(sample);
             if (hasOOI) {
-                double xv = 640.0 / (abs(ooiX - xs + SAMPLE_SIZE_DIV_2) + 1);
-                double yv = 480.0 / (abs(ooiY - ys + SAMPLE_SIZE_DIV_2) + 1);
-                dv.push_back((xv * yv) / (640.0 * 480.0));
+                double dxv = (abs(ooiX - xs * SAMPLE_SIZE - SAMPLE_SIZE_DIV_2) + 1);
+                double xv = 640.0 / dxv;
+                double yv = 480.0 / (abs(ooiY - ys * SAMPLE_SIZE - SAMPLE_SIZE_DIV_2) + 1);
+                dv.push_back((xv * yv) / 100);
             } else {
                 // not found
                 dv.push_back(-1.0);
@@ -1786,12 +1787,12 @@ void extractSamples(const VI &img, const int ooiX, const int ooiY, VVD &features
 pair<int, int>findMaximum(const VD &values) {
     int x = -1, y = -1, index = 0;
     double v = 0;
-    for (int ys = 0; ys < SAMPLE_SIZE; ys++) {
-        for (int xs = 0; xs < SAMPLE_SIZE; xs++) {
+    for (int ys = 0; ys < YSAMPLES; ys++) {
+        for (int xs = 0; xs < XSAMPLES; xs++) {
             if (values[index] > v) {
                 v = values[index];
-                x = xs + SAMPLE_SIZE_DIV_2;
-                y = ys + SAMPLE_SIZE_DIV_2;
+                x = xs * SAMPLE_SIZE + SAMPLE_SIZE_DIV_2;
+                y = ys * SAMPLE_SIZE + SAMPLE_SIZE_DIV_2;
             }
             // increment
             index++;
@@ -1818,6 +1819,12 @@ public:
         // collect test data
         extractSamples(imageDataLeft, leftX, leftY, trainLeftFeatures, trainLeftDV);
         extractSamples(imageDataRight, rightX, rightY, trainRightFeatures, trainRightDV);
+        
+        if (videoIndex == 1) {
+#warning just for testing
+            return 1;
+        }
+        
         return 0;
     }
     
@@ -1849,6 +1856,12 @@ public:
         // do train
         rfLeft.train(trainLeftFeatures, trainLeftDV, conf);
         rfRight.train(trainRightFeatures, trainRightDV, conf);
+        
+        // release memory
+        trainLeftFeatures.clear();
+        trainLeftDV.clear();
+        trainRightFeatures.clear();
+        trainRightDV.clear();
         
         return 0;
     }
