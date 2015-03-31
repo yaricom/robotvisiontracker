@@ -1,0 +1,63 @@
+Sample: 32x32, Trees: 500, mtry: 100
+====================================
+left: MSE = 0.02749
+right: MSE = 0.01222
+R[10] = 0.00000 0.00000
+R[20] = 0.00000 0.00000
+R[50] = 0.00000 0.00000
+Accuracy Score = 0.0
+Processing Time = 0 ms
+Time Multiplier = 2.00000
+Score = 0.000000
+
+Example score: 		78000.0
+Provisional score:	51600.0
+************************************
+
+Sample: 16x16, Trees: 500, mtry: 100
+====================================
+left: MSE = 0.03113
+right: MSE = 0.01222
+R[10] = 0.00 0.00
+R[20] = 0.00 0.00
+R[50] = 0.04 0.12
+Accuracy Score = 24000.0
+Processing Time = 233 ms
+Time Multiplier = 2.00
+Score = 48000.0
+
+Example score: 		36000.0	
+Provisional score:	
+************************************
+
+Sample: 16x16, Trees: 500, mtry: 400
+====================================
+left: MSE = 0.03236
+right: MSE = 0.01387
+R[10] = 0.00 0.02
+R[20] = 0.02 0.04
+R[50] = 0.02 0.10
+Accuracy Score = 49000.0
+Processing Time = 239 ms
+Time Multiplier = 2.00
+Score = 98000.0
+
+Example score: 		
+Provisional score:	57600.0
+************************************
+
+Sample: 8x8, Trees: 500, mtry: 400
+====================================
+left: MSE = 0.03329
+right: MSE = 0.01481
+R[10] = 0.00 0.02
+R[20] = 0.00 0.06
+R[50] = 0.00 0.16
+Accuracy Score = 55000.0
+Processing Time = 267 ms
+Time Multiplier = 2.00
+Score = 110000.0
+
+Example score: 		
+Provisional score:	
+************************************

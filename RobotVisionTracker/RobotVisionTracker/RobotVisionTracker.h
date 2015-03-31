@@ -592,7 +592,11 @@ public:
         mse = (double*)calloc(ntree, sizeof(double));
         
         // copy data
-        double X[n_size * p_size], Y[n_size];
+//        double X[n_size * p_size], Y[n_size];
+        double Y[n_size];
+        
+        // allocate on heap
+        double *X = (double *) calloc(n_size * p_size, sizeof(double));
         
         int dimx[2];
         dimx[0] = n_size;
@@ -600,7 +604,7 @@ public:
         
         for (int i = 0; i < n_size; i++) {
             for (int j = 0; j < p_size; j++){
-                if (ncat[i] == 1) {
+                if (ncat[j] == 1) {
                     // just ordinary numeric feature
                     double fval = input_X[i][j];
                     X[i * p_size + j] = fval;
@@ -654,19 +658,6 @@ public:
         int jprint = config.do_trace;
         bool print_verbose_tree_progression = false;
         
-        //below call just prints individual values
-        //        print_regRF_params( dimx, &sampsize,
-        //         &nodesize, &nrnodes, &ntree, &mtry,
-        //         imp, cat, config.maxcat, &jprint,
-        //         config.doProx, config.oobprox, config.biasCorr, y_pred_trn,
-        //         impout, impmat,impSD, prox,
-        //         ndtree, nodestatus, lDaughter, rDaughter,
-        //         avnode, mbest,upper, mse,
-        //         keepf, &replace, testdat, xts,
-        //         &nts, yts, labelts, yTestPred,
-        //         proxts, msets, coef,nout,
-        //         inbag);
-        
         //train the RF
         regRF(X, Y, dimx, &sampsize,
               &nodesize, &nrnodes, &ntree, &mtry,
@@ -683,6 +674,7 @@ public:
         // let the train variables go free
         free(yTestPred);
         free(msets);
+        free(X);
     }
     
     VD predict(const VVD &test_X, const RF_config &config) {
@@ -710,7 +702,7 @@ public:
         double X_test[n_size * p_size];
         for (int i = 0; i < n_size; i++) {
             for (int j = 0; j < p_size; j++){
-                if (ncat[i] == 1) {
+                if (ncat[j] == 1) {
                     // just ordinary numeric feature
                     X_test[i * p_size + j] = test_X[i][j];
                 } else {
@@ -727,19 +719,6 @@ public:
             }
         }
         
-        //below call just prints individual values
-        //        print_regRF_params( dimx, &sampsize,
-        //         &nodesize, &nrnodes, &ntree, &mtry,
-        //         imp, cat, config.maxcat, &jprint,
-        //         config.doProx, config.oobprox, config.biasCorr, y_pred_trn,
-        //         impout, impmat,impSD, prox,
-        //         ndtree, nodestatus, lDaughter, rDaughter,
-        //         avnode, mbest,upper, mse,
-        //         keepf, &replace, testdat, xts,
-        //         &nts, yts, labelts, yTestPred,
-        //         proxts, msets, coef,nout,
-        //         inbag);
-        
         regForest(X_test, ypred, &mdim, &n_size,
                   &ntree, lDaughter, rDaughter,
                   nodestatus, &nrnodes, xsplit,
@@ -754,6 +733,7 @@ public:
         
         free(ypred);
         free(nodex);
+        free(proxMat);
         
         return res;
     }
@@ -813,26 +793,7 @@ private:
         }
         return catNum;
     }
-    
-    /*************************************************************************
-     * Input:
-     * mdim=number of variables in data set
-     * nsample=number of cases
-     *
-     * nthsize=number of cases in a node below which the tree will not split,
-     * setting nthsize=5 generally gives good results.
-     *
-     * nTree=number of trees in run.  200-500 gives pretty good results
-     *
-     * mtry=number of variables to pick to split on at each node.  mdim/3
-     * seems to give genrally good performance, but it can be
-     * altered up or down
-     *
-     * imp=1 turns on variable importance.  This is computed for the
-     * mth variable as the percent rise in the test set mean sum-of-
-     * squared errors when the mth variable is randomly permuted.
-     *
-     *************************************************************************/
+
     void regRF(double *x, double *y, int *xdim, int *sampsize,
                int *nthsize, int *nrnodes, int *nTree, int *mtry, int *imp,
                int *cat, int maxcat, int *jprint, int doProx, int oobprox,
@@ -1146,11 +1107,7 @@ private:
             }
         }
         for (m = 0; m < mdim; ++m) tgini[m] /= *nTree;
-        
-        
-        //addition by abhi
-        //in order to release the space stored by the variable in findBestSplit
-        // call by setting
+
         in_findBestSplit=-99;
         findBestSplit(&tmp_d, &tmp_i, &tmp_d, tmp_i, tmp_i,
                       tmp_i, tmp_i, &tmp_i, &tmp_d,
@@ -1744,7 +1701,7 @@ private:
     }
 };
 
-const static int SAMPLE_SIZE = 32;
+const static int SAMPLE_SIZE = 8;//16;//32;
 const static int SAMPLE_SIZE_DIV_2 = SAMPLE_SIZE / 2;
 const static int SAMPLE_SIZE_POW = SAMPLE_SIZE * SAMPLE_SIZE;
 const static int XSAMPLES = 640 / SAMPLE_SIZE;
@@ -1755,7 +1712,6 @@ VD extractSample(const VI &img, const int x, const int y) {
     int index = x + y * 640;
     int resIndex = 0;
     for (int j = 0; j < SAMPLE_SIZE; j++) {
-        copy(img.begin() + index, img.begin() + index + SAMPLE_SIZE, res.begin() + j * SAMPLE_SIZE);
         for (int i = 0; i < SAMPLE_SIZE; i++) {
             res[resIndex++] = img[index + i] / 16777216.0;
         }
@@ -1765,11 +1721,13 @@ VD extractSample(const VI &img, const int x, const int y) {
 }
 
 void extractSamples(const VI &img, const int ooiX, const int ooiY, VVD &features, VD &dv) {
-    bool hasOOI = ooiX > 0 && ooiY > 0;
+    bool hasOOI = (ooiX > 0 && ooiY > 0);
+    int sCount = 0;
     for (int ys = 0; ys < YSAMPLES; ys++) {
         for (int xs = 0; xs < XSAMPLES; xs++) {
             VD sample = extractSample(img, xs * SAMPLE_SIZE, ys * SAMPLE_SIZE);
             features.push_back(sample);
+            sCount++;
             if (hasOOI) {
                 double dxv = (abs(ooiX - xs * SAMPLE_SIZE - SAMPLE_SIZE_DIV_2) + 1);
                 double xv = 640.0 / dxv;
@@ -1781,7 +1739,54 @@ void extractSamples(const VI &img, const int ooiX, const int ooiY, VVD &features
             }
         }
     }
+    Printf("Extracted %i samples\n", sCount);
+}
+
+double sampleRegion(const VI &img, const int x, const int y) {
+    double res = 0;
+    int index = x + y * 640;
+    for (int j = 0; j < SAMPLE_SIZE; j++) {
+        for (int i = 0; i < SAMPLE_SIZE; i++) {
+            res += img[index + i] / 16777216.0;
+        }
+        index += 640;
+    }
+    res /= SAMPLE_SIZE_POW;
+    return res;
+}
+
+void sampleRegions(const VI &img, const int ooiX, const int ooiY, VVD &features, VD &dv) {
+    bool hasOOI = (ooiX > 0 && ooiY > 0);
+    int sCount = 0;
+    VD samples(YSAMPLES * XSAMPLES, 0);
+    for (int ys = 0; ys < YSAMPLES; ys++) {
+        for (int xs = 0; xs < XSAMPLES; xs++) {
+            double sample = sampleRegion(img, xs * SAMPLE_SIZE, ys * SAMPLE_SIZE);
+            samples[sCount++] = sample;
+        }
+    }
+    if (hasOOI) {
+        double xv = round(100.0 * ooiX / 640.0);
+        double yv = ooiY / 480.0;
+        double v = (xv + yv) / 100.0;
+        dv.push_back(v);
+    } else {
+        // not found
+        dv.push_back(-1.0);
+    }
+    features.push_back(samples);
     
+//    Printf("Sampled %i regions\n", sCount);
+}
+
+pair<int, int>extractCoordinates(const double value) {
+    int x = -1, y = -1;
+    if (value > 0) {
+        double v = value * 100.0;
+        x = 640.0 * floor(v) / 100.0;
+        y = 480.0 * (v - floor(v));
+    }
+    return pair<int, int>(x, y);
 }
 
 pair<int, int>findMaximum(const VD &values) {
@@ -1791,8 +1796,9 @@ pair<int, int>findMaximum(const VD &values) {
         for (int xs = 0; xs < XSAMPLES; xs++) {
             if (values[index] > v) {
                 v = values[index];
-                x = xs * SAMPLE_SIZE + SAMPLE_SIZE_DIV_2;
-                y = ys * SAMPLE_SIZE + SAMPLE_SIZE_DIV_2;
+                v *= 100.0;
+                x = 640 * floor(v) / 100.0;
+                y = 480 * (v - floor(v));
             }
             // increment
             index++;
@@ -1814,15 +1820,19 @@ class RobotVisionTracker {
     RF_Regression rfLeft;
     RF_Regression rfRight;
     
+    int ooiCount = 0;
+    int noOoiCount = 0;
+    
 public:
     int training(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight, const int leftX, const int leftY, const int rightX, const int rightY) {
         // collect test data
-        extractSamples(imageDataLeft, leftX, leftY, trainLeftFeatures, trainLeftDV);
-        extractSamples(imageDataRight, rightX, rightY, trainRightFeatures, trainRightDV);
+        sampleRegions(imageDataLeft, leftX, leftY, trainLeftFeatures, trainLeftDV);
+        sampleRegions(imageDataRight, rightX, rightY, trainRightFeatures, trainRightDV);
         
-        if (videoIndex == 1) {
-#warning just for testing
-            return 1;
+        if (leftX < 0 || leftY < 0) {
+            noOoiCount++;
+        } else {
+            ooiCount++;
         }
         
         return 0;
@@ -1832,26 +1842,28 @@ public:
         // do left
         VVD testFeatures;
         VD testDV;
-        extractSamples(imageDataLeft, -1, -1, testFeatures, testDV);
+        sampleRegions(imageDataLeft, -1, -1, testFeatures, testDV);
         
         VD res = rfLeft.predict(testFeatures, conf);
-        pair<int, int> left = findMaximum(res);
+        pair<int, int> left = extractCoordinates(res[0]);
         
         // do right
         testFeatures.clear();
         testDV.clear();
-        extractSamples(imageDataRight, -1, -1, testFeatures, testDV);
+        sampleRegions(imageDataRight, -1, -1, testFeatures, testDV);
         
         res = rfRight.predict(testFeatures, conf);
-        pair<int, int> right = findMaximum(res);
+        pair<int, int> right = extractCoordinates(res[0]);
         
         VI result = {left.first, left.second, right.first, right.second};
         return result;
     }
     
     int doneTraining() {
-        conf.nTree = 1500;
-        conf.mtry = 10;
+        Printf("Frames with OOI: %i, without OOI: %i", ooiCount, noOoiCount);
+        
+        conf.nTree = 500;
+        conf.mtry = 400;
         
         // do train
         rfLeft.train(trainLeftFeatures, trainLeftDV, conf);
