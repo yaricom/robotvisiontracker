@@ -216,7 +216,7 @@ public:
         int userRightY[NUM_OF_TESTING_FRAMES];
         
         double score = 0;
-        time_t processingTime = 0;
+        clock_t processingTime = 0;
 
         for (int f = 0; f < NUM_OF_TESTING_FRAMES; f++) {
             userLeftX[f] = userLeftY[f] = userRightX[f] = userRightY[f] = -1;
@@ -236,14 +236,22 @@ public:
             gtfRightX[f] = aTestAnnotations[videoIndex].rightX[index];
             gtfRightY[f] = aTestAnnotations[videoIndex].rightY[index];
             
-            time_t startTime = time(NULL) * 1000;
+            clock_t startTime = clock();
             
             VI ret = task->testing(videoIndex, frameIndex, aFrame.leftImg, aFrame.rightImg);
             
-            time_t endTime = time(NULL) * 1000;
+            // store values
+            userLeftX[f] = ret[0];
+            userLeftY[f] = ret[1];
+            userRightX[f] = ret[2];
+            userRightY[f] = ret[3];
+            
+            clock_t endTime = clock();
             
             processingTime += endTime - startTime;
         }
+        
+        processingTime = 1000 * ((float)processingTime) / CLOCKS_PER_SEC;
         
         // calculate score
         correctOutOfBounds(gtfLeftX, gtfLeftY);
@@ -256,13 +264,13 @@ public:
         double r20 = countFrameCorrect(gtfRightX, gtfRightY, userRightX, userRightY, 20 * 20);
         double r50 = countFrameCorrect(gtfRightX, gtfRightY, userRightX, userRightY, 50 * 50);
         
-        Printf("R[10] = %.5f %.5f\n", l10, r10);
-        Printf("R[20] = %.5f %.5f\n", l20, r20);
-        Printf("R[50] = %.5f %.5f\n", l50, r50);
+        Printf("R[10] = %.2f %.2f\n", l10, r10);
+        Printf("R[20] = %.2f %.2f\n", l20, r20);
+        Printf("R[50] = %.2f %.2f\n", l50, r50);
         
         double accuracyScore = 10000.0 * (50.0 * (l10 + r10) + 35.0 * (l20 + r20) + 15.0 * (l50 + r50));
         
-        Printf("Accuracy Score = %f\n", accuracyScore);
+        Printf("Accuracy Score = %.1f\n", accuracyScore);
         Printf("Processing Time = %d ms\n", processingTime);
         
         double timeMultiplier = 1.0;
@@ -271,7 +279,7 @@ public:
         if (T > 100.0) timeMultiplier = 0;
         timeMultiplier += 1.0;
         
-        Printf("Time Multiplier = %.5f\n", timeMultiplier);
+        Printf("Time Multiplier = %.2f\n", timeMultiplier);
         
         score = timeMultiplier * accuracyScore;
         
@@ -291,7 +299,7 @@ private:
     
     double countFrameCorrect(const int *gtfX, const int *gtfY, const int *userX, const int *userY, const int radi) {
         double p = 0;
-        for (int i = 0; i < sizeof(gtfX)/sizeof(gtfX[0]); i++) {
+        for (int i = 0; i < NUM_OF_TESTING_FRAMES; i++) {
             if (gtfX[i] < 0 && userX[i] < 0) {
                 // correctly detected that object is not in view
                 p += 1.0 / NUM_OF_TESTING_FRAMES;
@@ -324,5 +332,5 @@ int main(int argc, const char * argv[]) {
     runner.folder = argv[1];
     
     double score = runner.doExec();
-    fprintf(stderr, "Score = %f\n", score);
+    fprintf(stderr, "Score = %.1f\n", score);
 }
