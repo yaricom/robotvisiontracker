@@ -58,6 +58,22 @@ Processing Time = 267 ms
 Time Multiplier = 2.00
 Score = 110000.0
 
-Example score: 		
-Provisional score:	
+Example score: 		44000.0
+Provisional score:	61600.0
+************************************
+
+Sample: 2x2, Trees: 500, mtry: 400
+====================================
+left:  MSE = 0.03814
+right: MSE =  0.01599
+R[10] = 0.00 0.00
+R[20] = 0.02 0.00
+R[50] = 0.08 0.06
+Accuracy Score = 28000.0
+Processing Time = 629 ms
+Time Multiplier = 2.00
+Score = 56000.0
+
+Example score: 		24000.0
+Provisional score:	98000.0	
 ************************************
