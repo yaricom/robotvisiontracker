@@ -1701,7 +1701,7 @@ private:
     }
 };
 
-const static int SAMPLE_SIZE = 8;//16;//32;
+const static int SAMPLE_SIZE = 2;//8;//16;//32;
 const static int SAMPLE_SIZE_DIV_2 = SAMPLE_SIZE / 2;
 const static int SAMPLE_SIZE_POW = SAMPLE_SIZE * SAMPLE_SIZE;
 const static int XSAMPLES = 640 / SAMPLE_SIZE;
@@ -1860,7 +1860,7 @@ public:
     }
     
     int doneTraining() {
-        Printf("Frames with OOI: %i, without OOI: %i", ooiCount, noOoiCount);
+        Printf("Frames with OOI: %i, without OOI: %i\n", ooiCount, noOoiCount);
         
         conf.nTree = 500;
         conf.mtry = 400;
