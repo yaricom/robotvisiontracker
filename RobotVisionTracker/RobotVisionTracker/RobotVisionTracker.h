@@ -84,67 +84,219 @@ inline double getTime() {
     return tv.tv_sec + 1e-6 * tv.tv_usec;
 }
 
-struct RNG {
-    unsigned int MT[624];
-    int index;
+//
+// ----------------------------
+//
+class HoG{
+public:
+    HoG();
+    int wx;
+    int wy;
+    int nbin;
+    void HOGdescriptor(vector<vector<double>>& Im, vector<double>& descriptor);
     
-    RNG(int seed = 1) {
-        init(seed);
-    }
-    
-    void init(int seed = 1) {
-        MT[0] = seed;
-        for(int i = 1; i < 624; i++) MT[i] = (1812433253UL * (MT[i-1] ^ (MT[i-1] >> 30)) + i);
-        index = 0;
-    }
-    
-    void generate() {
-        const unsigned int MULT[] = {0, 2567483615UL};
-        for(int i = 0; i < 227; i++) {
-            unsigned int y = (MT[i] & 0x8000000UL) + (MT[i+1] & 0x7FFFFFFFUL);
-            MT[i] = MT[i+397] ^ (y >> 1);
-            MT[i] ^= MULT[y&1];
-        }
-        for(int i = 227; i < 623; i++) {
-            unsigned int y = (MT[i] & 0x8000000UL) + (MT[i+1] & 0x7FFFFFFFUL);
-            MT[i] = MT[i-227] ^ (y >> 1);
-            MT[i] ^= MULT[y&1];
-        }
-        unsigned int y = (MT[623] & 0x8000000UL) + (MT[0] & 0x7FFFFFFFUL);
-        MT[623] = MT[623-227] ^ (y >> 1);
-        MT[623] ^= MULT[y&1];
-    }
-    
-    unsigned int rand() {
-        if (index == 0) {
-            generate();
-        }
-        
-        unsigned int y = MT[index];
-        y ^= y >> 11;
-        y ^= y << 7  & 2636928640UL;
-        y ^= y << 15 & 4022730752UL;
-        y ^= y >> 18;
-        index = index == 623 ? 0 : index + 1;
-        return y;
-    }
-    
-    inline int next() {
-        return rand();
-    }
-    
-    inline int next(int x) {
-        return rand() % x;
-    }
-    
-    inline int next(int a, int b) {
-        return a + (rand() % (b - a));
-    }
-    
-    inline double nextDouble() {
-        return (rand() + 0.5) * (1.0 / 4294967296.0);
-    }
+private:
+    double PI = 3.14159;
+    void imfilterGx(vector<vector<double>>& Im, vector<vector<double>>& grad_xr);
+    void imfilterGy(vector<vector<double>>& Im, vector<vector<double>>& grad_yu);
+    void GetAnglesAndMagnit(vector<vector<double>>& grad_yu, vector<vector<double>>& grad_xr,  \
+                            vector<vector<double>>& angles, vector<vector<double>>& magnit);
+    void GetVector2Range(vector<vector<double>>& inVec, int L1, int L2, int C1, int C2,  \
+                         vector<vector<double>>& outVec);
+    void StraitenVector(vector<vector<double>>& inVec, vector<double>& outLine);
+    float L2NormVec1(vector<double>& inVec);
 };
+
+HoG::HoG()         // set default values of wx, wy and nbin
+{
+    wx = 5;
+    wy = 5;
+    nbin = 10;
+}
+
+
+// gradients on x direction
+void HoG::imfilterGx(vector<vector<double>>& Im, vector<vector<double>>& grad_xr)
+{
+    // hx = [-1, 0, 1];
+    grad_xr.clear();
+    grad_xr = Im;
+    float TempLeft, TempRight;
+    for (int ii = 0; ii<Im.size(); ii++)
+    {
+        for (int jj = 0; jj<Im[0].size(); jj++)
+        {
+            TempLeft = (jj - 1<0 ? 0 : Im[ii][jj - 1]);
+            TempRight = (jj + 1 >= Im[0].size() ? 0 : Im[ii][jj + 1]);
+            grad_xr[ii][jj] = TempRight - TempLeft;
+        }
+    }
+    return;
+}
+
+// gradients on y direction
+void HoG::imfilterGy(vector<vector<double>>& Im, vector<vector<double>>& grad_yu)
+{
+    // hy = [1 0 -1]^T
+    grad_yu.clear();
+    grad_yu = Im;
+    float TempUp, TempDown;
+    for (int ii = 0; ii<Im.size(); ii++)
+    {
+        for (int jj = 0; jj<Im[0].size(); jj++)
+        {
+            TempUp = (ii - 1<0 ? 0 : Im[ii - 1][jj]);
+            TempDown = (ii + 1 >= Im.size() ? 0 : Im[ii + 1][jj]);
+            grad_yu[ii][jj] = TempUp - TempDown;
+        }
+    }
+    return;
+}
+
+
+// compute angle and magnitude
+void HoG::GetAnglesAndMagnit(vector<vector<double>>& grad_yu, vector<vector<double>>& grad_xr,  \
+                             vector<vector<double>>& angles, vector<vector<double>>& magnit)
+{
+    angles.clear();
+    angles = grad_xr;
+    for (int ii = 0; ii<grad_xr.size(); ii++)
+    {
+        for (int jj = 0; jj<grad_xr[0].size(); jj++)
+        {
+            angles[ii][jj] = atan2(grad_yu[ii][jj], grad_xr[ii][jj]);
+        }
+    }
+    
+    magnit.clear();
+    magnit = grad_xr;
+    for (int ii = 0; ii<grad_xr.size(); ii++)
+    {
+        for (int jj = 0; jj<grad_xr[0].size(); jj++)
+        {
+            magnit[ii][jj] = sqrt(pow(grad_yu[ii][jj], 2) + pow(grad_xr[ii][jj], 2));
+        }
+    }
+    
+    return;
+}
+
+void HoG::GetVector2Range(vector<vector<double>>& inVec, int L1, int L2, int C1, int C2, vector<vector<double>>& outVec)
+{
+    outVec.clear();
+    int Lnum = L2 - L1 + 1;
+    int Cnum = C2 - C1 + 1;
+    vector<vector<double>> tmpVec(Lnum, vector<double>(Cnum));
+    for (int ii = L1 - 1; ii<L2; ii++)
+    {
+        for (int jj = C1 - 1; jj<C2; jj++)
+        {
+            tmpVec[ii - L1 + 1][jj - C1 + 1] = inVec[ii][jj];
+        }
+    }
+    outVec = tmpVec;
+    
+    return;
+}
+
+void HoG::StraitenVector(vector<vector<double>>& inVec, vector<double>& outLine)
+{
+    outLine.clear();
+    for (int jj = 0; jj<inVec[0].size(); jj++)
+    {
+        for (int ii = 0; ii<inVec.size(); ii++)
+        {
+            outLine.push_back(inVec[ii][jj]);
+        }
+    }
+    return;
+}
+
+float HoG::L2NormVec1(vector<double>& inVec)
+{
+    float value = 0;
+    for (int ii = 0; ii<inVec.size(); ii++)
+    {
+        value += pow(inVec[ii], 2);
+    }
+    return sqrt(value);
+}
+
+
+// project angle and magnitude into bins
+void HoG::HOGdescriptor(vector<vector<double>>& Im, vector<double>& descriptor)
+{
+    int nwin_x = wx;
+    int nwin_y = wy;
+    int B = nbin;
+    int L = (int)Im.size();
+    int C = (int)Im[0].size();
+    vector<double> H(nwin_x*nwin_y*B, 0);
+    Assert(C > 1, "Error: Input Im has only one column");
+
+    int step_x = floor(C / (nwin_x + 1));
+    int step_y = floor(L / (nwin_y + 1));
+    int cont = 0;
+    //	cout << nwin_x << " " << nwin_y << " " << B << " " << L << " " << C << " " << m
+    // << " " << step_x << " " << step_y << endl;
+    vector<vector<double>> grad_xr;
+    imfilterGx(Im, grad_xr);
+    vector<vector<double>> grad_yu;
+    imfilterGy(Im, grad_yu);
+    vector<vector<double>> angles;
+    vector<vector<double>> magnit;
+    GetAnglesAndMagnit(grad_yu, grad_xr, angles, magnit);
+    
+    for (int n = 0; n<nwin_y; n++)
+    {
+        for (int m = 0; m<nwin_x; m++)
+        {
+            cont++;
+            vector<vector<double>> angles2;
+            GetVector2Range(angles, n*step_y + 1, (n + 2)*step_y, m*step_x + 1, (m + 2)*step_x, angles2);
+            vector<vector<double>> magnit2;
+            GetVector2Range(magnit, n*step_y + 1, (n + 2)*step_y, m*step_x + 1, (m + 2)*step_x, magnit2);
+            vector<double> v_angles;
+            StraitenVector(angles2, v_angles);
+            vector<double> v_magnit;
+            StraitenVector(magnit2, v_magnit);
+            int K = (int)v_angles.size();
+            int bin = -1;
+            vector<double> H2(B, 0);
+            for (float ang_lim = -PI + 2 * PI / B; ang_lim <= PI + 0.01; ang_lim += 2 * PI / B)
+            {
+                //cout << ang_lim << "     " << 2*PI/B << endl;
+                bin++;
+                for (int k = 0; k<K; k++)
+                {
+                    if (v_angles[k]<ang_lim)
+                    {
+                        v_angles[k] = 100;
+                        H2[bin] += v_magnit[k];
+                    }
+                }
+            }
+            double nH2 = L2NormVec1(H2);
+            for (int ss = 0; ss<H2.size(); ss++)
+            {
+                H2[ss] = H2[ss] / (nH2 + 0.01);
+            }
+            
+            for (int tt = (cont - 1)*B; tt<cont*B; tt++)
+            {
+                H[tt] = H2[tt - (cont - 1)*B];
+            }
+        }
+    }
+    
+    descriptor.clear();
+    descriptor = H;
+    
+    return;
+    
+}
+
+
 //
 // ----------------------------
 //
@@ -1701,11 +1853,31 @@ private:
     }
 };
 
-const static int SAMPLE_SIZE = 2;//8;//16;//32;
+const static int SAMPLE_SIZE = 64;//2;//8;//16;//32;
 const static int SAMPLE_SIZE_DIV_2 = SAMPLE_SIZE / 2;
 const static int SAMPLE_SIZE_POW = SAMPLE_SIZE * SAMPLE_SIZE;
 const static int XSAMPLES = 640 / SAMPLE_SIZE;
 const static int YSAMPLES = 480 / SAMPLE_SIZE;
+
+HoG hogoperator;
+
+
+void extractSampleHOG(const VI &img, const int x, const int y, VD &descriptor) {
+    VVD res(SAMPLE_SIZE, VD(SAMPLE_SIZE, 0));
+    int index = x + y * 640;
+    for (int j = 0; j < SAMPLE_SIZE; j++) {
+        VD row(SAMPLE_SIZE, 0);
+        copy(img.begin() + index, img.begin() + index + SAMPLE_SIZE, row.begin());
+        index += 640;
+        // add row
+        res.push_back(row);
+    }
+    // calculate HOG
+    hogoperator.wx = SAMPLE_SIZE;
+    hogoperator.wy = SAMPLE_SIZE;
+    hogoperator.nbin = 8;
+    hogoperator.HOGdescriptor(res, descriptor);
+}
 
 VD extractSample(const VI &img, const int x, const int y) {
     VD res(SAMPLE_SIZE_POW, 0);
@@ -1725,7 +1897,8 @@ void extractSamples(const VI &img, const int ooiX, const int ooiY, VVD &features
     int sCount = 0;
     for (int ys = 0; ys < YSAMPLES; ys++) {
         for (int xs = 0; xs < XSAMPLES; xs++) {
-            VD sample = extractSample(img, xs * SAMPLE_SIZE, ys * SAMPLE_SIZE);
+            VD sample;
+            extractSampleHOG(img, xs * SAMPLE_SIZE, ys * SAMPLE_SIZE, sample);
             features.push_back(sample);
             sCount++;
             if (hasOOI) {
@@ -1826,8 +1999,8 @@ class RobotVisionTracker {
 public:
     int training(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight, const int leftX, const int leftY, const int rightX, const int rightY) {
         // collect test data
-        sampleRegions(imageDataLeft, leftX, leftY, trainLeftFeatures, trainLeftDV);
-        sampleRegions(imageDataRight, rightX, rightY, trainRightFeatures, trainRightDV);
+        extractSamples(imageDataLeft, leftX, leftY, trainLeftFeatures, trainLeftDV);
+        extractSamples(imageDataRight, rightX, rightY, trainRightFeatures, trainRightDV);
         
         if (leftX < 0 || leftY < 0) {
             noOoiCount++;
@@ -1842,7 +2015,7 @@ public:
         // do left
         VVD testFeatures;
         VD testDV;
-        sampleRegions(imageDataLeft, -1, -1, testFeatures, testDV);
+        extractSamples(imageDataLeft, -1, -1, testFeatures, testDV);
         
         VD res = rfLeft.predict(testFeatures, conf);
         pair<int, int> left = extractCoordinates(res[0]);
@@ -1850,7 +2023,7 @@ public:
         // do right
         testFeatures.clear();
         testDV.clear();
-        sampleRegions(imageDataRight, -1, -1, testFeatures, testDV);
+        extractSamples(imageDataRight, -1, -1, testFeatures, testDV);
         
         res = rfRight.predict(testFeatures, conf);
         pair<int, int> right = extractCoordinates(res[0]);
