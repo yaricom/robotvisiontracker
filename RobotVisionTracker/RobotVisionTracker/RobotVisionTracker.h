@@ -99,16 +99,14 @@ private:
     double PI = 3.14159;
     void imfilterGx(vector<vector<double>>& Im, vector<vector<double>>& grad_xr);
     void imfilterGy(vector<vector<double>>& Im, vector<vector<double>>& grad_yu);
-    void GetAnglesAndMagnit(vector<vector<double>>& grad_yu, vector<vector<double>>& grad_xr,  \
-                            vector<vector<double>>& angles, vector<vector<double>>& magnit);
-    void GetVector2Range(vector<vector<double>>& inVec, int L1, int L2, int C1, int C2,  \
-                         vector<vector<double>>& outVec);
+    void GetAnglesAndMagnit(vector<vector<double>>& grad_yu, vector<vector<double>>& grad_xr, vector<vector<double>>& angles, vector<vector<double>>& magnit);
+    void GetVector2Range(vector<vector<double>>& inVec, int L1, int L2, int C1, int C2, vector<vector<double>>& outVec);
     void StraitenVector(vector<vector<double>>& inVec, vector<double>& outLine);
     float L2NormVec1(vector<double>& inVec);
 };
 
-HoG::HoG()         // set default values of wx, wy and nbin
-{
+// set default values of wx, wy and nbin
+HoG::HoG() {
     wx = 5;
     wy = 5;
     nbin = 10;
@@ -116,16 +114,13 @@ HoG::HoG()         // set default values of wx, wy and nbin
 
 
 // gradients on x direction
-void HoG::imfilterGx(vector<vector<double>>& Im, vector<vector<double>>& grad_xr)
-{
+void HoG::imfilterGx(vector<vector<double>>& Im, vector<vector<double>>& grad_xr) {
     // hx = [-1, 0, 1];
     grad_xr.clear();
     grad_xr = Im;
     float TempLeft, TempRight;
-    for (int ii = 0; ii<Im.size(); ii++)
-    {
-        for (int jj = 0; jj<Im[0].size(); jj++)
-        {
+    for (int ii = 0; ii < Im.size(); ii++) {
+        for (int jj = 0; jj < Im[0].size(); jj++) {
             TempLeft = (jj - 1<0 ? 0 : Im[ii][jj - 1]);
             TempRight = (jj + 1 >= Im[0].size() ? 0 : Im[ii][jj + 1]);
             grad_xr[ii][jj] = TempRight - TempLeft;
@@ -135,16 +130,13 @@ void HoG::imfilterGx(vector<vector<double>>& Im, vector<vector<double>>& grad_xr
 }
 
 // gradients on y direction
-void HoG::imfilterGy(vector<vector<double>>& Im, vector<vector<double>>& grad_yu)
-{
+void HoG::imfilterGy(vector<vector<double>>& Im, vector<vector<double>>& grad_yu) {
     // hy = [1 0 -1]^T
     grad_yu.clear();
     grad_yu = Im;
     float TempUp, TempDown;
-    for (int ii = 0; ii<Im.size(); ii++)
-    {
-        for (int jj = 0; jj<Im[0].size(); jj++)
-        {
+    for (int ii = 0; ii < Im.size(); ii++) {
+        for (int jj = 0; jj < Im[0].size(); jj++) {
             TempUp = (ii - 1<0 ? 0 : Im[ii - 1][jj]);
             TempDown = (ii + 1 >= Im.size() ? 0 : Im[ii + 1][jj]);
             grad_yu[ii][jj] = TempUp - TempDown;
@@ -156,24 +148,19 @@ void HoG::imfilterGy(vector<vector<double>>& Im, vector<vector<double>>& grad_yu
 
 // compute angle and magnitude
 void HoG::GetAnglesAndMagnit(vector<vector<double>>& grad_yu, vector<vector<double>>& grad_xr,  \
-                             vector<vector<double>>& angles, vector<vector<double>>& magnit)
-{
+                             vector<vector<double>>& angles, vector<vector<double>>& magnit) {
     angles.clear();
     angles = grad_xr;
-    for (int ii = 0; ii<grad_xr.size(); ii++)
-    {
-        for (int jj = 0; jj<grad_xr[0].size(); jj++)
-        {
+    for (int ii = 0; ii < grad_xr.size(); ii++) {
+        for (int jj = 0; jj < grad_xr[0].size(); jj++) {
             angles[ii][jj] = atan2(grad_yu[ii][jj], grad_xr[ii][jj]);
         }
     }
     
     magnit.clear();
     magnit = grad_xr;
-    for (int ii = 0; ii<grad_xr.size(); ii++)
-    {
-        for (int jj = 0; jj<grad_xr[0].size(); jj++)
-        {
+    for (int ii = 0; ii < grad_xr.size(); ii++) {
+        for (int jj = 0; jj < grad_xr[0].size(); jj++) {
             magnit[ii][jj] = sqrt(pow(grad_yu[ii][jj], 2) + pow(grad_xr[ii][jj], 2));
         }
     }
@@ -181,16 +168,13 @@ void HoG::GetAnglesAndMagnit(vector<vector<double>>& grad_yu, vector<vector<doub
     return;
 }
 
-void HoG::GetVector2Range(vector<vector<double>>& inVec, int L1, int L2, int C1, int C2, vector<vector<double>>& outVec)
-{
+void HoG::GetVector2Range(vector<vector<double>>& inVec, int L1, int L2, int C1, int C2, vector<vector<double>>& outVec) {
     outVec.clear();
     int Lnum = L2 - L1 + 1;
     int Cnum = C2 - C1 + 1;
     vector<vector<double>> tmpVec(Lnum, vector<double>(Cnum));
-    for (int ii = L1 - 1; ii<L2; ii++)
-    {
-        for (int jj = C1 - 1; jj<C2; jj++)
-        {
+    for (int ii = L1 - 1; ii < L2; ii++) {
+        for (int jj = C1 - 1; jj < C2; jj++) {
             tmpVec[ii - L1 + 1][jj - C1 + 1] = inVec[ii][jj];
         }
     }
@@ -199,24 +183,19 @@ void HoG::GetVector2Range(vector<vector<double>>& inVec, int L1, int L2, int C1,
     return;
 }
 
-void HoG::StraitenVector(vector<vector<double>>& inVec, vector<double>& outLine)
-{
+void HoG::StraitenVector(vector<vector<double>>& inVec, vector<double>& outLine) {
     outLine.clear();
-    for (int jj = 0; jj<inVec[0].size(); jj++)
-    {
-        for (int ii = 0; ii<inVec.size(); ii++)
-        {
+    for (int jj = 0; jj < inVec[0].size(); jj++) {
+        for (int ii = 0; ii < inVec.size(); ii++) {
             outLine.push_back(inVec[ii][jj]);
         }
     }
     return;
 }
 
-float HoG::L2NormVec1(vector<double>& inVec)
-{
+float HoG::L2NormVec1(vector<double>& inVec) {
     float value = 0;
-    for (int ii = 0; ii<inVec.size(); ii++)
-    {
+    for (int ii = 0; ii < inVec.size(); ii++) {
         value += pow(inVec[ii], 2);
     }
     return sqrt(value);
@@ -224,21 +203,19 @@ float HoG::L2NormVec1(vector<double>& inVec)
 
 
 // project angle and magnitude into bins
-void HoG::HOGdescriptor(vector<vector<double>>& Im, vector<double>& descriptor)
-{
+void HoG::HOGdescriptor(vector<vector<double>>& Im, vector<double>& descriptor) {
     int nwin_x = wx;
     int nwin_y = wy;
     int B = nbin;
     int L = (int)Im.size();
     int C = (int)Im[0].size();
-    vector<double> H(nwin_x*nwin_y*B, 0);
+    vector<double> H(nwin_x * nwin_y * B, 0);
     Assert(C > 1, "Error: Input Im has only one column");
-
+    
     int step_x = floor(C / (nwin_x + 1));
     int step_y = floor(L / (nwin_y + 1));
     int cont = 0;
-    //	cout << nwin_x << " " << nwin_y << " " << B << " " << L << " " << C << " " << m
-    // << " " << step_x << " " << step_y << endl;
+    //    cout << nwin_x << " " << nwin_y << " " << B << " " << L << " " << C << " " << step_x << " " << step_y << endl;
     vector<vector<double>> grad_xr;
     imfilterGx(Im, grad_xr);
     vector<vector<double>> grad_yu;
@@ -247,10 +224,8 @@ void HoG::HOGdescriptor(vector<vector<double>>& Im, vector<double>& descriptor)
     vector<vector<double>> magnit;
     GetAnglesAndMagnit(grad_yu, grad_xr, angles, magnit);
     
-    for (int n = 0; n<nwin_y; n++)
-    {
-        for (int m = 0; m<nwin_x; m++)
-        {
+    for (int n = 0; n < nwin_y; n++) {
+        for (int m = 0; m < nwin_x; m++) {
             cont++;
             vector<vector<double>> angles2;
             GetVector2Range(angles, n*step_y + 1, (n + 2)*step_y, m*step_x + 1, (m + 2)*step_x, angles2);
@@ -263,27 +238,22 @@ void HoG::HOGdescriptor(vector<vector<double>>& Im, vector<double>& descriptor)
             int K = (int)v_angles.size();
             int bin = -1;
             vector<double> H2(B, 0);
-            for (float ang_lim = -PI + 2 * PI / B; ang_lim <= PI + 0.01; ang_lim += 2 * PI / B)
-            {
+            for (float ang_lim = -PI + 2 * PI / B; ang_lim <= PI + 0.01; ang_lim += 2 * PI / B) {
                 //cout << ang_lim << "     " << 2*PI/B << endl;
                 bin++;
-                for (int k = 0; k<K; k++)
-                {
-                    if (v_angles[k]<ang_lim)
-                    {
+                for (int k = 0; k < K; k++) {
+                    if (v_angles[k] < ang_lim) {
                         v_angles[k] = 100;
                         H2[bin] += v_magnit[k];
                     }
                 }
             }
             double nH2 = L2NormVec1(H2);
-            for (int ss = 0; ss<H2.size(); ss++)
-            {
+            for (int ss = 0; ss < H2.size(); ss++) {
                 H2[ss] = H2[ss] / (nH2 + 0.01);
             }
             
-            for (int tt = (cont - 1)*B; tt<cont*B; tt++)
-            {
+            for (int tt = (cont - 1)*B; tt < cont*B; tt++) {
                 H[tt] = H2[tt - (cont - 1)*B];
             }
         }
@@ -744,7 +714,7 @@ public:
         mse = (double*)calloc(ntree, sizeof(double));
         
         // copy data
-//        double X[n_size * p_size], Y[n_size];
+        //        double X[n_size * p_size], Y[n_size];
         double Y[n_size];
         
         // allocate on heap
@@ -945,7 +915,7 @@ private:
         }
         return catNum;
     }
-
+    
     void regRF(double *x, double *y, int *xdim, int *sampsize,
                int *nthsize, int *nrnodes, int *nTree, int *mtry, int *imp,
                int *cat, int maxcat, int *jprint, int doProx, int oobprox,
@@ -1259,7 +1229,7 @@ private:
             }
         }
         for (m = 0; m < mdim; ++m) tgini[m] /= *nTree;
-
+        
         in_findBestSplit=-99;
         findBestSplit(&tmp_d, &tmp_i, &tmp_d, tmp_i, tmp_i,
                       tmp_i, tmp_i, &tmp_i, &tmp_d,
@@ -1852,8 +1822,1433 @@ private:
         Printf("replace %d, labelts %d, proxts %f\n", *replace, labelts, *proxts);
     }
 };
+//=============================================================================================
+//
+//-----------------------------Start TRON------------------------------------------------------
+#ifdef __cplusplus
+extern "C" {
+#endif
+    int dscal_(int *n, double *sa, double *sx, int *incx) {
+        long int i, m, nincx, nn, iincx;
+        double ssa;
+        
+        /* scales a vector by a constant.
+         uses unrolled loops for increment equal to 1.
+         jack dongarra, linpack, 3/11/78.
+         modified 3/93 to return if incx .le. 0.
+         modified 12/3/93, array(1) declarations changed to array(*) */
+        
+        /* Dereference inputs */
+        nn = *n;
+        iincx = *incx;
+        ssa = *sa;
+        
+        if (nn > 0 && iincx > 0)
+        {
+            if (iincx == 1) /* code for increment equal to 1 */
+            {
+                m = nn-4;
+                for (i = 0; i < m; i += 5)
+                {
+                    sx[i] = ssa * sx[i];
+                    sx[i+1] = ssa * sx[i+1];
+                    sx[i+2] = ssa * sx[i+2];
+                    sx[i+3] = ssa * sx[i+3];
+                    sx[i+4] = ssa * sx[i+4];
+                }
+                for ( ; i < nn; ++i) /* clean-up loop */
+                    sx[i] = ssa * sx[i];
+            }
+            else /* code for increment not equal to 1 */
+            {
+                nincx = nn * iincx;
+                for (i = 0; i < nincx; i += iincx)
+                    sx[i] = ssa * sx[i];
+            }
+        }
+        
+        return 0;
+    }
+    
+    double dnrm2_(int *n, double *x, int *incx) {
+        long int ix, nn, iincx;
+        double norm, scale, absxi, ssq, temp;
+        
+        /*  DNRM2 returns the euclidean norm of a vector via the function
+         name, so that
+         
+         DNRM2 := sqrt( x'*x )
+         
+         -- This version written on 25-October-1982.
+         Modified on 14-October-1993 to inline the call to SLASSQ.
+         Sven Hammarling, Nag Ltd.   */
+        
+        /* Dereference inputs */
+        nn = *n;
+        iincx = *incx;
+        
+        if( nn > 0 && iincx > 0 )
+        {
+            if (nn == 1)
+            {
+                norm = fabs(x[0]);
+            }
+            else
+            {
+                scale = 0.0;
+                ssq = 1.0;
+                
+                /* The following loop is equivalent to this call to the LAPACK
+                 auxiliary routine:   CALL SLASSQ( N, X, INCX, SCALE, SSQ ) */
+                
+                for (ix=(nn-1)*iincx; ix>=0; ix-=iincx)
+                {
+                    if (x[ix] != 0.0)
+                    {
+                        absxi = fabs(x[ix]);
+                        if (scale < absxi)
+                        {
+                            temp = scale / absxi;
+                            ssq = ssq * (temp * temp) + 1.0;
+                            scale = absxi;
+                        }
+                        else
+                        {
+                            temp = absxi / scale;
+                            ssq += temp * temp;
+                        }
+                    }
+                }
+                norm = scale * sqrt(ssq);
+            }
+        }
+        else
+            norm = 0.0;
+        
+        return norm;
+        
+    }
+    
+    double ddot_(int *n, double *sx, int *incx, double *sy, int *incy) {
+        long int i, m, nn, iincx, iincy;
+        double stemp;
+        long int ix, iy;
+        
+        /* forms the dot product of two vectors.
+         uses unrolled loops for increments equal to one.
+         jack dongarra, linpack, 3/11/78.
+         modified 12/3/93, array(1) declarations changed to array(*) */
+        
+        /* Dereference inputs */
+        nn = *n;
+        iincx = *incx;
+        iincy = *incy;
+        
+        stemp = 0.0;
+        if (nn > 0)
+        {
+            if (iincx == 1 && iincy == 1) /* code for both increments equal to 1 */
+            {
+                m = nn-4;
+                for (i = 0; i < m; i += 5)
+                    stemp += sx[i] * sy[i] + sx[i+1] * sy[i+1] + sx[i+2] * sy[i+2] +
+                    sx[i+3] * sy[i+3] + sx[i+4] * sy[i+4];
+                
+                for ( ; i < nn; i++)        /* clean-up loop */
+                    stemp += sx[i] * sy[i];
+            }
+            else /* code for unequal increments or equal increments not equal to 1 */
+            {
+                ix = 0;
+                iy = 0;
+                if (iincx < 0)
+                    ix = (1 - nn) * iincx;
+                if (iincy < 0)
+                    iy = (1 - nn) * iincy;
+                for (i = 0; i < nn; i++)
+                {
+                    stemp += sx[ix] * sy[iy];
+                    ix += iincx;
+                    iy += iincy;
+                }
+            }
+        }
+        
+        return stemp;
+    }
+    
+    int daxpy_(int *n, double *sa, double *sx, int *incx, double *sy, int *incy) {
+        long int i, m, ix, iy, nn, iincx, iincy;
+        register double ssa;
+        
+        /* constant times a vector plus a vector.
+         uses unrolled loop for increments equal to one.
+         jack dongarra, linpack, 3/11/78.
+         modified 12/3/93, array(1) declarations changed to array(*) */
+        
+        /* Dereference inputs */
+        nn = *n;
+        ssa = *sa;
+        iincx = *incx;
+        iincy = *incy;
+        
+        if( nn > 0 && ssa != 0.0 )
+        {
+            if (iincx == 1 && iincy == 1) /* code for both increments equal to 1 */
+            {
+                m = nn-3;
+                for (i = 0; i < m; i += 4)
+                {
+                    sy[i] += ssa * sx[i];
+                    sy[i+1] += ssa * sx[i+1];
+                    sy[i+2] += ssa * sx[i+2];
+                    sy[i+3] += ssa * sx[i+3];
+                }
+                for ( ; i < nn; ++i) /* clean-up loop */
+                    sy[i] += ssa * sx[i];
+            }
+            else /* code for unequal increments or equal increments not equal to 1 */
+            {
+                ix = iincx >= 0 ? 0 : (1 - nn) * iincx;
+                iy = iincy >= 0 ? 0 : (1 - nn) * iincy;
+                for (i = 0; i < nn; i++)
+                {
+                    sy[iy] += ssa * sx[ix];
+                    ix += iincx;
+                    iy += iincy;
+                }
+            }
+        }
+        
+        return 0;
+    }
+#ifdef __cplusplus
+}
+#endif
 
-const static int SAMPLE_SIZE = 64;//2;//8;//16;//32;
+static void default_print(const char *buf)
+{
+    fputs(buf,stdout);
+    fflush(stdout);
+}
+
+class tronFunction
+{
+public:
+    virtual double fun(double *w) = 0 ;
+    virtual void grad(double *w, double *g) = 0 ;
+    virtual void Hv(double *s, double *Hs) = 0 ;
+    
+    virtual int get_nr_variable(void) = 0 ;
+    virtual ~tronFunction(void){}
+};
+
+class TRON
+{
+public:
+    TRON(const tronFunction *fun_obj, double eps = 0.1, int max_iter = 1000);
+    
+    void tron(double *w);
+    void set_print_string(void (*i_print) (const char *buf));
+    
+private:
+    int trcg(double delta, double *g, double *s, double *r);
+    double norm_inf(int n, double *x);
+    
+    double eps;
+    int max_iter;
+    tronFunction *fun_obj;
+    void info(const char *fmt,...);
+    void (*tron_print_string)(const char *buf);
+};
+
+void TRON::info(const char *fmt,...)
+{
+    char buf[BUFSIZ];
+    va_list ap;
+    va_start(ap,fmt);
+    vsprintf(buf,fmt,ap);
+    va_end(ap);
+    (*tron_print_string)(buf);
+}
+
+TRON::TRON(const tronFunction *fun_obj, double eps, int max_iter)
+{
+    this->fun_obj=const_cast<tronFunction *>(fun_obj);
+    this->eps=eps;
+    this->max_iter=max_iter;
+    tron_print_string = default_print;
+}
+
+void TRON::tron(double *w)
+{
+    // Parameters for updating the iterates.
+    double eta0 = 1e-4, eta1 = 0.25, eta2 = 0.75;
+    
+    // Parameters for updating the trust region size delta.
+    double sigma1 = 0.25, sigma2 = 0.5, sigma3 = 4;
+    
+    int n = fun_obj->get_nr_variable();
+    int i, cg_iter;
+    double delta, snorm, one=1.0;
+    double alpha, f, fnew, prered, actred, gs;
+    int search = 1, iter = 1, inc = 1;
+    double *s = new double[n];
+    double *r = new double[n];
+    double *w_new = new double[n];
+    double *g = new double[n];
+    
+    double *w0 = new double[n];
+    for (i=0; i<n; i++)
+        w0[i] = 0;
+    fun_obj->fun(w0);
+    fun_obj->grad(w0, g);
+    double gnorm1 = dnrm2_(&n, g, &inc);
+    delete [] w0;
+    
+    f = fun_obj->fun(w);
+    fun_obj->grad(w, g);
+    delta = dnrm2_(&n, g, &inc);
+    double gnorm = delta;
+    
+    if (gnorm <= eps*gnorm1)
+        search = 0;
+    
+    iter = 1;
+    
+    while (iter <= max_iter && search)
+    {
+        cg_iter = trcg(delta, g, s, r);
+        
+        memcpy(w_new, w, sizeof(double)*n);
+        daxpy_(&n, &one, s, &inc, w_new, &inc);
+        
+        gs = ddot_(&n, g, &inc, s, &inc);
+        prered = -0.5*(gs-ddot_(&n, s, &inc, r, &inc));
+        fnew = fun_obj->fun(w_new);
+        
+        // Compute the actual reduction.
+        actred = f - fnew;
+        
+        // On the first iteration, adjust the initial step bound.
+        snorm = dnrm2_(&n, s, &inc);
+        if (iter == 1)
+            delta = min(delta, snorm);
+        
+        // Compute prediction alpha*snorm of the step.
+        if (fnew - f - gs <= 0)
+            alpha = sigma3;
+        else
+            alpha = max(sigma1, -0.5*(gs/(fnew - f - gs)));
+        
+        // Update the trust region bound according to the ratio of actual to predicted reduction.
+        if (actred < eta0*prered)
+            delta = min(max(alpha, sigma1)*snorm, sigma2*delta);
+        else if (actred < eta1*prered)
+            delta = max(sigma1*delta, min(alpha*snorm, sigma2*delta));
+        else if (actred < eta2*prered)
+            delta = max(sigma1*delta, min(alpha*snorm, sigma3*delta));
+        else
+            delta = max(delta, min(alpha*snorm, sigma3*delta));
+        
+        info("iter %2d act %5.3e pre %5.3e delta %5.3e f %5.3e |g| %5.3e CG %3d\n", iter, actred, prered, delta, f, gnorm, cg_iter);
+        
+        if (actred > eta0*prered)
+        {
+            iter++;
+            memcpy(w, w_new, sizeof(double)*n);
+            f = fnew;
+            fun_obj->grad(w, g);
+            
+            gnorm = dnrm2_(&n, g, &inc);
+            if (gnorm <= eps*gnorm1)
+                break;
+        }
+        if (f < -1.0e+32)
+        {
+            info("WARNING: f < -1.0e+32\n");
+            break;
+        }
+        if (fabs(actred) <= 0 && prered <= 0)
+        {
+            info("WARNING: actred and prered <= 0\n");
+            break;
+        }
+        if (fabs(actred) <= 1.0e-12*fabs(f) &&
+            fabs(prered) <= 1.0e-12*fabs(f))
+        {
+            info("WARNING: actred and prered too small\n");
+            break;
+        }
+    }
+    
+    delete[] g;
+    delete[] r;
+    delete[] w_new;
+    delete[] s;
+}
+
+int TRON::trcg(double delta, double *g, double *s, double *r)
+{
+    int i, inc = 1;
+    int n = fun_obj->get_nr_variable();
+    double one = 1;
+    double *d = new double[n];
+    double *Hd = new double[n];
+    double rTr, rnewTrnew, alpha, beta, cgtol;
+    
+    for (i=0; i<n; i++)
+    {
+        s[i] = 0;
+        r[i] = -g[i];
+        d[i] = r[i];
+    }
+    cgtol = 0.1*dnrm2_(&n, g, &inc);
+    
+    int cg_iter = 0;
+    rTr = ddot_(&n, r, &inc, r, &inc);
+    while (1)
+    {
+        if (dnrm2_(&n, r, &inc) <= cgtol)
+            break;
+        cg_iter++;
+        fun_obj->Hv(d, Hd);
+        
+        alpha = rTr/ddot_(&n, d, &inc, Hd, &inc);
+        daxpy_(&n, &alpha, d, &inc, s, &inc);
+        if (dnrm2_(&n, s, &inc) > delta)
+        {
+            info("cg reaches trust region boundary\n");
+            alpha = -alpha;
+            daxpy_(&n, &alpha, d, &inc, s, &inc);
+            
+            double std = ddot_(&n, s, &inc, d, &inc);
+            double sts = ddot_(&n, s, &inc, s, &inc);
+            double dtd = ddot_(&n, d, &inc, d, &inc);
+            double dsq = delta*delta;
+            double rad = sqrt(std*std + dtd*(dsq-sts));
+            if (std >= 0)
+                alpha = (dsq - sts)/(std + rad);
+            else
+                alpha = (rad - std)/dtd;
+            daxpy_(&n, &alpha, d, &inc, s, &inc);
+            alpha = -alpha;
+            daxpy_(&n, &alpha, Hd, &inc, r, &inc);
+            break;
+        }
+        alpha = -alpha;
+        daxpy_(&n, &alpha, Hd, &inc, r, &inc);
+        rnewTrnew = ddot_(&n, r, &inc, r, &inc);
+        beta = rnewTrnew/rTr;
+        dscal_(&n, &beta, d, &inc);
+        daxpy_(&n, &one, r, &inc, d, &inc);
+        rTr = rnewTrnew;
+    }
+    
+    delete[] d;
+    delete[] Hd;
+    
+    return(cg_iter);
+}
+
+double TRON::norm_inf(int n, double *x)
+{
+    double dmax = fabs(x[0]);
+    for (int i=1; i<n; i++)
+        if (fabs(x[i]) >= dmax)
+            dmax = fabs(x[i]);
+    return(dmax);
+}
+
+void TRON::set_print_string(void (*print_string) (const char *buf))
+{
+    tron_print_string = print_string;
+}
+//-----------------------------End TRON-------------------------------------------------------
+//-----------------------------Start SVM------------------------------------------------------
+struct feature_node {
+    int index;
+    double value;
+};
+
+struct problem {
+    int l, n;
+    double *y;
+    struct feature_node **x;
+    double bias;            /* < 0 if no bias term */
+};
+
+enum { L2R_LR, L2R_L2LOSS_SVC_DUAL, L2R_L2LOSS_SVC, L2R_L1LOSS_SVC_DUAL, MCSVM_CS, L1R_L2LOSS_SVC, L1R_LR, L2R_LR_DUAL, L2R_L2LOSS_SVR = 11, L2R_L2LOSS_SVR_DUAL, L2R_L1LOSS_SVR_DUAL }; /* solver_type */
+
+struct parameter {
+    int solver_type;
+    
+    /* these are for training only */
+    double eps;	        /* stopping criteria */
+    double C;
+    int nr_weight;
+    int *weight_label;
+    double* weight;
+    double p;
+};
+
+struct model {
+    struct parameter param;
+    int nr_class;		/* number of classes */
+    int nr_feature;
+    double *w;
+    int *label;		/* label of each class */
+    double bias;
+};
+//---------------------------------------------------------------------------------------------
+struct model* warm_start_train(const struct problem *prob, const struct parameter *param, const struct model *wsmodel);
+int check_regression_model(const struct model *model);
+int check_probability_model(const struct model *model);
+double predict(const struct model *model_, const struct feature_node *x);
+
+typedef signed char schar;
+template <class S, class T> static inline void clone(T*& dst, S* src, int n)
+{
+    dst = new T[n];
+    memcpy((void *)dst,(void *)src,sizeof(T)*n);
+}
+#define Malloc(type,n) (type *)malloc((n)*sizeof(type))
+#define INF HUGE_VAL
+
+static void print_string_stdout(const char *s)
+{
+    fputs(s,stdout);
+    fflush(stdout);
+}
+
+static void (*liblinear_print_string) (const char *) = &print_string_stdout;
+
+#if 1
+static void info(const char *fmt,...)
+{
+    char buf[BUFSIZ];
+    va_list ap;
+    va_start(ap,fmt);
+    vsprintf(buf,fmt,ap);
+    va_end(ap);
+    (*liblinear_print_string)(buf);
+}
+#else
+static void info(const char *fmt,...) {}
+#endif
+
+class l2r_lr_fun: public tronFunction
+{
+public:
+    l2r_lr_fun(const problem *prob, double *C);
+    ~l2r_lr_fun();
+    
+    double fun(double *w);
+    void grad(double *w, double *g);
+    void Hv(double *s, double *Hs);
+    
+    int get_nr_variable(void);
+    
+private:
+    void Xv(double *v, double *Xv);
+    void XTv(double *v, double *XTv);
+    
+    double *C;
+    double *z;
+    double *D;
+    const problem *prob;
+};
+
+l2r_lr_fun::l2r_lr_fun(const problem *prob, double *C)
+{
+    int l=prob->l;
+    
+    this->prob = prob;
+    
+    z = new double[l];
+    D = new double[l];
+    this->C = C;
+}
+
+l2r_lr_fun::~l2r_lr_fun()
+{
+    delete[] z;
+    delete[] D;
+}
+
+
+double l2r_lr_fun::fun(double *w)
+{
+    int i;
+    double f=0;
+    double *y=prob->y;
+    int l=prob->l;
+    int w_size=get_nr_variable();
+    
+    Xv(w, z);
+    
+    for(i=0;i<w_size;i++)
+        f += w[i]*w[i];
+    f /= 2.0;
+    for(i=0;i<l;i++)
+    {
+        double yz = y[i]*z[i];
+        if (yz >= 0)
+            f += C[i]*log(1 + exp(-yz));
+        else
+            f += C[i]*(-yz+log(1 + exp(yz)));
+    }
+    
+    return(f);
+}
+
+void l2r_lr_fun::grad(double *w, double *g)
+{
+    int i;
+    double *y=prob->y;
+    int l=prob->l;
+    int w_size=get_nr_variable();
+    
+    for(i=0;i<l;i++)
+    {
+        z[i] = 1/(1 + exp(-y[i]*z[i]));
+        D[i] = z[i]*(1-z[i]);
+        z[i] = C[i]*(z[i]-1)*y[i];
+    }
+    XTv(z, g);
+    
+    for(i=0;i<w_size;i++)
+        g[i] = w[i] + g[i];
+}
+
+int l2r_lr_fun::get_nr_variable(void)
+{
+    return prob->n;
+}
+
+void l2r_lr_fun::Hv(double *s, double *Hs)
+{
+    int i;
+    int l=prob->l;
+    int w_size=get_nr_variable();
+    double *wa = new double[l];
+    
+    Xv(s, wa);
+    for(i=0;i<l;i++)
+        wa[i] = C[i]*D[i]*wa[i];
+    
+    XTv(wa, Hs);
+    for(i=0;i<w_size;i++)
+        Hs[i] = s[i] + Hs[i];
+    delete[] wa;
+}
+
+void l2r_lr_fun::Xv(double *v, double *Xv)
+{
+    int i;
+    int l=prob->l;
+    feature_node **x=prob->x;
+    
+    for(i=0;i<l;i++)
+    {
+        feature_node *s=x[i];
+        Xv[i]=0;
+        while(s->index!=-1)
+        {
+            Xv[i]+=v[s->index-1]*s->value;
+            s++;
+        }
+    }
+}
+
+void l2r_lr_fun::XTv(double *v, double *XTv)
+{
+    int i;
+    int l=prob->l;
+    int w_size=get_nr_variable();
+    feature_node **x=prob->x;
+    
+    for(i=0;i<w_size;i++)
+        XTv[i]=0;
+    for(i=0;i<l;i++)
+    {
+        feature_node *s=x[i];
+        while(s->index!=-1)
+        {
+            XTv[s->index-1]+=v[i]*s->value;
+            s++;
+        }
+    }
+}
+
+class l2r_l2_svc_fun: public tronFunction
+{
+public:
+    l2r_l2_svc_fun(const problem *prob, double *C);
+    ~l2r_l2_svc_fun();
+    
+    double fun(double *w);
+    void grad(double *w, double *g);
+    void Hv(double *s, double *Hs);
+    
+    int get_nr_variable(void);
+    
+protected:
+    void Xv(double *v, double *Xv);
+    void subXv(double *v, double *Xv);
+    void subXTv(double *v, double *XTv);
+    
+    double *C;
+    double *z;
+    double *D;
+    int *I;
+    int sizeI;
+    const problem *prob;
+};
+
+l2r_l2_svc_fun::l2r_l2_svc_fun(const problem *prob, double *C)
+{
+    int l=prob->l;
+    
+    this->prob = prob;
+    
+    z = new double[l];
+    D = new double[l];
+    I = new int[l];
+    this->C = C;
+}
+
+l2r_l2_svc_fun::~l2r_l2_svc_fun()
+{
+    delete[] z;
+    delete[] D;
+    delete[] I;
+}
+
+double l2r_l2_svc_fun::fun(double *w)
+{
+    int i;
+    double f=0;
+    double *y=prob->y;
+    int l=prob->l;
+    int w_size=get_nr_variable();
+    
+    Xv(w, z);
+    
+    for(i=0;i<w_size;i++)
+        f += w[i]*w[i];
+    f /= 2.0;
+    for(i=0;i<l;i++)
+    {
+        z[i] = y[i]*z[i];
+        double d = 1-z[i];
+        if (d > 0)
+            f += C[i]*d*d;
+    }
+    
+    return(f);
+}
+
+void l2r_l2_svc_fun::grad(double *w, double *g)
+{
+    int i;
+    double *y=prob->y;
+    int l=prob->l;
+    int w_size=get_nr_variable();
+    
+    sizeI = 0;
+    for (i=0;i<l;i++)
+        if (z[i] < 1)
+        {
+            z[sizeI] = C[i]*y[i]*(z[i]-1);
+            I[sizeI] = i;
+            sizeI++;
+        }
+    subXTv(z, g);
+    
+    for(i=0;i<w_size;i++)
+        g[i] = w[i] + 2*g[i];
+}
+
+int l2r_l2_svc_fun::get_nr_variable(void)
+{
+    return prob->n;
+}
+
+void l2r_l2_svc_fun::Hv(double *s, double *Hs)
+{
+    int i;
+    int w_size=get_nr_variable();
+    double *wa = new double[sizeI];
+    
+    subXv(s, wa);
+    for(i=0;i<sizeI;i++)
+        wa[i] = C[I[i]]*wa[i];
+    
+    subXTv(wa, Hs);
+    for(i=0;i<w_size;i++)
+        Hs[i] = s[i] + 2*Hs[i];
+    delete[] wa;
+}
+
+void l2r_l2_svc_fun::Xv(double *v, double *Xv)
+{
+    int i;
+    int l=prob->l;
+    feature_node **x=prob->x;
+    
+    for(i=0;i<l;i++)
+    {
+        feature_node *s=x[i];
+        Xv[i]=0;
+        while(s->index!=-1)
+        {
+            Xv[i]+=v[s->index-1]*s->value;
+            s++;
+        }
+    }
+}
+
+void l2r_l2_svc_fun::subXv(double *v, double *Xv)
+{
+    int i;
+    feature_node **x=prob->x;
+    
+    for(i=0;i<sizeI;i++)
+    {
+        feature_node *s=x[I[i]];
+        Xv[i]=0;
+        while(s->index!=-1)
+        {
+            Xv[i]+=v[s->index-1]*s->value;
+            s++;
+        }
+    }
+}
+
+void l2r_l2_svc_fun::subXTv(double *v, double *XTv)
+{
+    int i;
+    int w_size=get_nr_variable();
+    feature_node **x=prob->x;
+    
+    for(i=0;i<w_size;i++)
+        XTv[i]=0;
+    for(i=0;i<sizeI;i++)
+    {
+        feature_node *s=x[I[i]];
+        while(s->index!=-1)
+        {
+            XTv[s->index-1]+=v[i]*s->value;
+            s++;
+        }
+    }
+}
+
+class l2r_l2_svr_fun: public l2r_l2_svc_fun
+{
+public:
+    l2r_l2_svr_fun(const problem *prob, double *C, double p);
+    
+    double fun(double *w);
+    void grad(double *w, double *g);
+    
+private:
+    double p;
+};
+
+l2r_l2_svr_fun::l2r_l2_svr_fun(const problem *prob, double *C, double p):
+l2r_l2_svc_fun(prob, C)
+{
+    this->p = p;
+}
+
+double l2r_l2_svr_fun::fun(double *w)
+{
+    int i;
+    double f=0;
+    double *y=prob->y;
+    int l=prob->l;
+    int w_size=get_nr_variable();
+    double d;
+    
+    Xv(w, z);
+    
+    for(i=0;i<w_size;i++)
+        f += w[i]*w[i];
+    f /= 2;
+    for(i=0;i<l;i++)
+    {
+        d = z[i] - y[i];
+        if(d < -p)
+            f += C[i]*(d+p)*(d+p);
+        else if(d > p)
+            f += C[i]*(d-p)*(d-p);
+    }
+    
+    return(f);
+}
+
+void l2r_l2_svr_fun::grad(double *w, double *g)
+{
+    int i;
+    double *y=prob->y;
+    int l=prob->l;
+    int w_size=get_nr_variable();
+    double d;
+    
+    sizeI = 0;
+    for(i=0;i<l;i++)
+    {
+        d = z[i] - y[i];
+        
+        // generate index set I
+        if(d < -p)
+        {
+            z[sizeI] = C[i]*(d+p);
+            I[sizeI] = i;
+            sizeI++;
+        }
+        else if(d > p)
+        {
+            z[sizeI] = C[i]*(d-p);
+            I[sizeI] = i;
+            sizeI++;
+        }
+        
+    }
+    subXTv(z, g);
+    
+    for(i=0;i<w_size;i++)
+        g[i] = w[i] + 2*g[i];
+}
+
+// label: label name, start: begin of each class, count: #data of classes, perm: indices to the original data
+// perm, length l, must be allocated before calling this subroutine
+static void group_classes(const problem *prob, int *nr_class_ret, int **label_ret, int **start_ret, int **count_ret, int *perm) {
+    int l = prob->l;
+    int max_nr_class = 16;
+    int nr_class = 0;
+    int *label = Malloc(int,max_nr_class);
+    int *count = Malloc(int,max_nr_class);
+    int *data_label = Malloc(int,l);
+    int i;
+    
+    for(i=0;i<l;i++)
+    {
+        int this_label = (int)prob->y[i];
+        int j;
+        for(j=0;j<nr_class;j++)
+        {
+            if(this_label == label[j])
+            {
+                ++count[j];
+                break;
+            }
+        }
+        data_label[i] = j;
+        if(j == nr_class)
+        {
+            if(nr_class == max_nr_class)
+            {
+                max_nr_class *= 2;
+                label = (int *)realloc(label,max_nr_class*sizeof(int));
+                count = (int *)realloc(count,max_nr_class*sizeof(int));
+            }
+            label[nr_class] = this_label;
+            count[nr_class] = 1;
+            ++nr_class;
+        }
+    }
+    
+    //
+    // Labels are ordered by their first occurrence in the training set.
+    // However, for two-class sets with -1/+1 labels and -1 appears first,
+    // we swap labels to ensure that internally the binary SVM has positive data corresponding to the +1 instances.
+    //
+    if (nr_class == 2 && label[0] == -1 && label[1] == 1)
+    {
+        swap(label[0],label[1]);
+        swap(count[0],count[1]);
+        for(i=0;i<l;i++)
+        {
+            if(data_label[i] == 0)
+                data_label[i] = 1;
+            else
+                data_label[i] = 0;
+        }
+    }
+    
+    int *start = Malloc(int,nr_class);
+    start[0] = 0;
+    for(i=1;i<nr_class;i++)
+        start[i] = start[i-1]+count[i-1];
+    for(i=0;i<l;i++)
+    {
+        perm[start[data_label[i]]] = i;
+        ++start[data_label[i]];
+    }
+    start[0] = 0;
+    for(i=1;i<nr_class;i++)
+        start[i] = start[i-1]+count[i-1];
+    
+    *nr_class_ret = nr_class;
+    *label_ret = label;
+    *start_ret = start;
+    *count_ret = count;
+    free(data_label);
+}
+
+static void train_one(const problem *prob, const parameter *param, double *w, double Cp, double Cn)
+{
+    double eps=param->eps;
+    int pos = 0;
+    int neg = 0;
+    for(int i=0;i<prob->l;i++)
+        if(prob->y[i] > 0)
+            pos++;
+    neg = prob->l - pos;
+    
+    double primal_solver_tol = eps*max(min(pos,neg), 1)/prob->l;
+    
+    tronFunction *fun_obj=NULL;
+    switch(param->solver_type)
+    {
+        case L2R_LR:
+        {
+            double *C = new double[prob->l];
+            for(int i = 0; i < prob->l; i++)
+            {
+                if(prob->y[i] > 0)
+                    C[i] = Cp;
+                else
+                    C[i] = Cn;
+            }
+            fun_obj=new l2r_lr_fun(prob, C);
+            TRON tron_obj(fun_obj, primal_solver_tol);
+            tron_obj.set_print_string(liblinear_print_string);
+            tron_obj.tron(w);
+            delete fun_obj;
+            delete[] C;
+            break;
+        }
+        case L2R_L2LOSS_SVC:
+        {
+            double *C = new double[prob->l];
+            for(int i = 0; i < prob->l; i++)
+            {
+                if(prob->y[i] > 0)
+                    C[i] = Cp;
+                else
+                    C[i] = Cn;
+            }
+            fun_obj=new l2r_l2_svc_fun(prob, C);
+            TRON tron_obj(fun_obj, primal_solver_tol);
+            tron_obj.set_print_string(liblinear_print_string);
+            tron_obj.tron(w);
+            delete fun_obj;
+            delete[] C;
+            break;
+        }
+        default:
+            fprintf(stderr, "ERROR: unknown solver_type\n");
+            break;
+    }
+}
+
+struct label_index
+{
+    int label;
+    int index;
+};
+int label_compare(const void *a, const void *b)
+{
+    int a_label = ((struct label_index*)a)->label;
+    int b_label = ((struct label_index*)b)->label;
+    if(a_label > b_label)
+        return 1;
+    else if(a_label == b_label)
+        return 0;
+    else
+        return -1;
+}
+
+//
+// Interface functions
+//
+model* train(const problem *prob, const parameter *param)
+{
+    return warm_start_train(prob, param, NULL);
+}
+
+model* warm_start_train(const problem *prob, const parameter *param, const model *wsmodel)
+{
+    int i,j;
+    int l = prob->l;
+    int n = prob->n;
+    int w_size = prob->n;
+    model *model_ = Malloc(model,1);
+    
+    if(prob->bias>=0)
+        model_->nr_feature=n-1;
+    else
+        model_->nr_feature=n;
+    model_->param = *param;
+    model_->bias = prob->bias;
+    
+    if(check_regression_model(model_))
+    {
+        model_->w = Malloc(double, w_size);
+        model_->nr_class = 2;
+        model_->label = NULL;
+        train_one(prob, param, &model_->w[0], 0, 0);
+    }
+    else
+    {
+        int nr_class;
+        int *label = NULL;
+        int *start = NULL;
+        int *count = NULL;
+        int *perm = Malloc(int,l);
+        
+        // group training data of the same class
+        group_classes(prob,&nr_class,&label,&start,&count,perm);
+        
+        model_->nr_class=nr_class;
+        model_->label = Malloc(int,nr_class);
+        for(i=0;i<nr_class;i++)
+            model_->label[i] = label[i];
+        
+        // calculate weighted C
+        double *weighted_C = Malloc(double, nr_class);
+        for(i=0;i<nr_class;i++)
+            weighted_C[i] = param->C;
+        for(i=0;i<param->nr_weight;i++)
+        {
+            for(j=0;j<nr_class;j++)
+                if(param->weight_label[i] == label[j])
+                    break;
+            if(j == nr_class)
+                fprintf(stderr,"WARNING: class label %d specified in weight is not found\n", param->weight_label[i]);
+            else
+                weighted_C[j] *= param->weight[i];
+        }
+        
+        // constructing the subproblem
+        feature_node **x = Malloc(feature_node *,l);
+        for(i=0;i<l;i++)
+            x[i] = prob->x[perm[i]];
+        
+        int k;
+        problem sub_prob;
+        sub_prob.l = l;
+        sub_prob.n = n;
+        sub_prob.x = Malloc(feature_node *,sub_prob.l);
+        sub_prob.y = Malloc(double,sub_prob.l);
+        
+        for(k=0; k<sub_prob.l; k++)
+            sub_prob.x[k] = x[k];
+        
+        
+        if(nr_class == 2) {
+            model_->w=Malloc(double, w_size);
+            
+            int e0 = start[0]+count[0];
+            k=0;
+            for(; k<e0; k++)
+                sub_prob.y[k] = +1;
+            for(; k<sub_prob.l; k++)
+                sub_prob.y[k] = -1;
+            
+            if(wsmodel != NULL)
+            {
+                int min_nr_feature = min(w_size, wsmodel->nr_feature);
+                if(wsmodel->label[0] == model_->label[0])
+                    for(i=0;i<min_nr_feature;i++)
+                        model_->w[i] = wsmodel->w[i];
+                else
+                    for(i=0;i<min_nr_feature;i++)
+                        model_->w[i] = -wsmodel->w[i];
+                for(i=min_nr_feature;i<w_size;i++)
+                    model_->w[i] = 0;
+            }
+            else
+                for(i=0;i<w_size;i++)
+                    model_->w[i] = 0;
+            
+            train_one(&sub_prob, param, &model_->w[0], weighted_C[0], weighted_C[1]);
+        }
+        else
+        {
+            model_->w=Malloc(double, w_size*nr_class);
+            double *w=Malloc(double, w_size);
+            
+            int min_nr_feature = w_size;
+            int nr_matched_label = 0;
+            struct label_index *label_map = NULL;
+            if(wsmodel != NULL)
+            {
+                min_nr_feature = min(w_size, wsmodel->nr_feature);
+                label_map = Malloc(struct label_index, wsmodel->nr_class);
+                for(i=0;i<wsmodel->nr_class;i++)
+                {
+                    label_map[i].label = wsmodel->label[i];
+                    label_map[i].index = i;
+                }
+                qsort(label_map, wsmodel->nr_class, sizeof(struct label_index), label_compare);
+            }
+            
+            for(i=0;i<nr_class;i++)
+            {
+                int si = start[i];
+                int ei = si+count[i];
+                
+                k=0;
+                for(; k<si; k++)
+                    sub_prob.y[k] = -1;
+                for(; k<ei; k++)
+                    sub_prob.y[k] = +1;
+                for(; k<sub_prob.l; k++)
+                    sub_prob.y[k] = -1;
+                
+                int index = -1;
+                if(wsmodel != NULL)
+                {
+                    struct label_index key;
+                    struct label_index *found;
+                    key.label = model_->label[i];
+                    found = (struct label_index*)bsearch(&key, label_map, wsmodel->nr_class, sizeof(struct label_index), label_compare);
+                    if(found != NULL)
+                        index = found->index;
+                }
+                if(index >= 0)
+                {
+                    for(j=0;j<min_nr_feature;j++)
+                        w[j] = wsmodel->w[j*wsmodel->nr_class+index];
+                    for(j=min_nr_feature;j<w_size;j++)
+                        w[j] = 0;
+                    nr_matched_label++;
+                }
+                else
+                    for(j=0;j<w_size;j++)
+                        w[j] = 0;
+                
+                train_one(&sub_prob, param, w, weighted_C[i], param->C);
+                
+                for(int j=0;j<w_size;j++)
+                    model_->w[j*nr_class+i] = w[j];
+            }
+            free(w);
+            if(wsmodel != NULL)
+            {
+                if(nr_matched_label != nr_class || nr_class != wsmodel->nr_class)
+                    fprintf(stderr,"WARNING: class labels in training data do not match those in the initial model.\n");
+                free(label_map);
+            }
+        }
+        
+        free(x);
+        free(label);
+        free(start);
+        free(count);
+        free(perm);
+        free(sub_prob.x);
+        free(sub_prob.y);
+        free(weighted_C);
+    }
+    return model_;
+}
+
+double predict_values(const struct model *model_, const struct feature_node *x, double *dec_values)
+{
+    int idx;
+    int n;
+    if(model_->bias>=0)
+        n=model_->nr_feature+1;
+    else
+        n=model_->nr_feature;
+    double *w=model_->w;
+    int nr_class=model_->nr_class;
+    int i;
+    int nr_w;
+    if(nr_class==2 && model_->param.solver_type != MCSVM_CS)
+        nr_w = 1;
+    else
+        nr_w = nr_class;
+    
+    const feature_node *lx=x;
+    for(i=0;i<nr_w;i++)
+        dec_values[i] = 0;
+    for(; (idx=lx->index)!=-1; lx++)
+    {
+        // the dimension of testing data may exceed that of training
+        if(idx<=n)
+            for(i=0;i<nr_w;i++)
+                dec_values[i] += w[(idx-1)*nr_w+i]*lx->value;
+    }
+    
+    if(nr_class==2)
+    {
+        if(check_regression_model(model_))
+            return dec_values[0];
+        else
+            return (dec_values[0]>0)?model_->label[0]:model_->label[1];
+    }
+    else
+    {
+        int dec_max_idx = 0;
+        for(i=1;i<nr_class;i++)
+        {
+            if(dec_values[i] > dec_values[dec_max_idx])
+                dec_max_idx = i;
+        }
+        return model_->label[dec_max_idx];
+    }
+}
+
+double predict(const model *model_, const feature_node *x)
+{
+    double *dec_values = Malloc(double, model_->nr_class);
+    double label=predict_values(model_, x, dec_values);
+    free(dec_values);
+    return label;
+}
+
+double predict_probability(const struct model *model_, const struct feature_node *x, double* prob_estimates)
+{
+    if(check_probability_model(model_))
+    {
+        int i;
+        int nr_class=model_->nr_class;
+        int nr_w;
+        if(nr_class==2)
+            nr_w = 1;
+        else
+            nr_w = nr_class;
+        
+        double label=predict_values(model_, x, prob_estimates);
+        for(i=0;i<nr_w;i++)
+            prob_estimates[i]=1/(1+exp(-prob_estimates[i]));
+        
+        if(nr_class==2) // for binary classification
+            prob_estimates[1]=1.-prob_estimates[0];
+        else
+        {
+            double sum=0;
+            for(i=0; i<nr_class; i++)
+                sum+=prob_estimates[i];
+            
+            for(i=0; i<nr_class; i++)
+                prob_estimates[i]=prob_estimates[i]/sum;
+        }
+        
+        return label;
+    }
+    else
+        return 0;
+}
+
+void free_model_content(struct model *model_ptr)
+{
+    if(model_ptr->w != NULL)
+        free(model_ptr->w);
+    if(model_ptr->label != NULL)
+        free(model_ptr->label);
+}
+
+void free_and_destroy_model(struct model **model_ptr_ptr)
+{
+    struct model *model_ptr = *model_ptr_ptr;
+    if(model_ptr != NULL)
+    {
+        free_model_content(model_ptr);
+        free(model_ptr);
+    }
+}
+
+void destroy_param(parameter* param)
+{
+    if(param->weight_label != NULL)
+        free(param->weight_label);
+    if(param->weight != NULL)
+        free(param->weight);
+}
+
+const char *check_parameter(const problem *prob, const parameter *param) {
+    if(param->eps <= 0)
+        return "eps <= 0";
+    
+    if(param->C <= 0)
+        return "C <= 0";
+    
+    if(param->p < 0)
+        return "p < 0";
+    
+    if(param->solver_type != L2R_LR
+       && param->solver_type != L2R_L2LOSS_SVC)
+        return "unknown solver type";
+    
+    return NULL;
+}
+
+int check_probability_model(const struct model *model_)
+{
+    return (model_->param.solver_type==L2R_LR ||
+            model_->param.solver_type==L2R_LR_DUAL ||
+            model_->param.solver_type==L1R_LR);
+}
+
+int check_regression_model(const struct model *model_)
+{
+    return (model_->param.solver_type==L2R_L2LOSS_SVR ||
+            model_->param.solver_type==L2R_L1LOSS_SVR_DUAL ||
+            model_->param.solver_type==L2R_L2LOSS_SVR_DUAL);
+}
+
+void set_print_string_function(void (*print_func)(const char*))
+{
+    if (print_func == NULL)
+        liblinear_print_string = &print_string_stdout;
+    else
+        liblinear_print_string = print_func;
+}
+
+//-----------------------------End SVM---------------------------------------------------------
+
+void readProblem(const VVD &samples, const VD &dv, struct problem *prob, struct feature_node *x_space) {
+    prob->l = (int)samples.size();
+    prob->n = (int)samples[0].size();
+    prob->y = Malloc(double, prob->l);
+    size_t elements = prob->l * prob->n;
+    prob->x = Malloc(struct feature_node *, prob->l);
+    x_space = Malloc(struct feature_node, elements + prob->l);
+    
+    // fill with values
+    int j = 0;
+    for (int i = 0; i < prob->l; i++) {
+        // set Y
+        prob->y[i] = dv[i];
+        
+        // set X
+        prob->x[i] = &x_space[j];
+        for (int k = 0; k < prob->n; k++) {
+            x_space[j].index = k + 1;// starts from 1
+            x_space[j].value = samples[i][k];
+            
+            Printf("%i : %.2f\n", x_space[j].index, x_space[j].value);
+            
+            ++j;
+        }
+        // mark end of row
+        x_space[j++].index = -1;
+    }
+}
+
+//
+//---------------------------------------------------------------------------------------------
+//
+//=============================================================================================
+const static int SAMPLE_SIZE = 32;//64;//2;//8;//16;//32;
 const static int SAMPLE_SIZE_DIV_2 = SAMPLE_SIZE / 2;
 const static int SAMPLE_SIZE_POW = SAMPLE_SIZE * SAMPLE_SIZE;
 const static int XSAMPLES = 640 / SAMPLE_SIZE;
@@ -1861,6 +3256,9 @@ const static int YSAMPLES = 480 / SAMPLE_SIZE;
 
 HoG hogoperator;
 
+const static int HOG_WX = 4;
+const static int HOG_WY = 4;
+const static int HOG_BIN = 10;
 
 void extractSampleHOG(const VI &img, const int x, const int y, VD &descriptor) {
     VVD res(SAMPLE_SIZE, VD(SAMPLE_SIZE, 0));
@@ -1870,12 +3268,12 @@ void extractSampleHOG(const VI &img, const int x, const int y, VD &descriptor) {
         copy(img.begin() + index, img.begin() + index + SAMPLE_SIZE, row.begin());
         index += 640;
         // add row
-        res.push_back(row);
+        res[j] = row;
     }
     // calculate HOG
-    hogoperator.wx = SAMPLE_SIZE;
-    hogoperator.wy = SAMPLE_SIZE;
-    hogoperator.nbin = 8;
+    hogoperator.wx = HOG_WX;
+    hogoperator.wy = HOG_WY;
+    hogoperator.nbin = HOG_BIN;
     hogoperator.HOGdescriptor(res, descriptor);
 }
 
@@ -1890,6 +3288,28 @@ VD extractSample(const VI &img, const int x, const int y) {
         index += 640;
     }
     return res;
+}
+
+void extractLabeledSamples(const VI &img, const int ooiX, const int ooiY, VVD &features, VD &dv) {
+    bool hasOOI = (ooiX > 0 && ooiY > 0);
+    int sCount = 0, positives = 0;
+    for (int ys = 0; ys < YSAMPLES; ys++) {
+        for (int xs = 0; xs < XSAMPLES; xs++) {
+            VD sample;
+            extractSampleHOG(img, xs * SAMPLE_SIZE, ys * SAMPLE_SIZE, sample);
+            features.push_back(sample);
+            sCount++;
+            if (hasOOI && (ooiX >= xs * SAMPLE_SIZE && ooiX < xs * SAMPLE_SIZE + SAMPLE_SIZE
+                           && ooiY >= ys * SAMPLE_SIZE && ooiY < ys * SAMPLE_SIZE + SAMPLE_SIZE)) {
+                dv.push_back(1.0);
+                positives++;
+            } else {
+                // not found
+                dv.push_back(0.0);
+            }
+        }
+    }
+    Printf("Extracted %i samples with %i posititves\n", sCount, positives);
 }
 
 void extractSamples(const VI &img, const int ooiX, const int ooiY, VVD &features, VD &dv) {
@@ -1949,7 +3369,7 @@ void sampleRegions(const VI &img, const int ooiX, const int ooiY, VVD &features,
     }
     features.push_back(samples);
     
-//    Printf("Sampled %i regions\n", sCount);
+    //    Printf("Sampled %i regions\n", sCount);
 }
 
 pair<int, int>extractCoordinates(const double value) {
@@ -1996,11 +3416,49 @@ class RobotVisionTracker {
     int ooiCount = 0;
     int noOoiCount = 0;
     
+    model *modelLeft = NULL;
+    model *modelRight = NULL;
+    
+    parameter param;
+    
 public:
+    RobotVisionTracker() {
+        // init parameters
+        param.solver_type = L2R_LR;
+        //        param.solver_type = L2R_L2LOSS_SVC;
+        
+        param.eps = 0.01;
+        param.C = 1; // !
+        param.p = 0.1;
+        param.nr_weight = 0;
+        param.weight_label = NULL;
+        param.weight = NULL;
+    }
+    
     int training(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight, const int leftX, const int leftY, const int rightX, const int rightY) {
+        /*
+         // collect test data
+         extractLabeledSamples(imageDataLeft, leftX, leftY, trainLeftFeatures, trainLeftDV);
+         extractLabeledSamples(imageDataRight, rightX, rightY, trainRightFeatures, trainRightDV);
+         
+         // do train
+         problem prob;
+         feature_node *x_space;
+         readProblem(trainLeftFeatures, trainLeftDV, &prob, x_space);
+         if (!modelLeft) {
+         modelLeft = train(&prob, &param);
+         } else {
+         modelLeft = warm_start_train(&prob, &param, modelLeft);
+         }
+         free(prob.y);
+         free(prob.x);
+         free(x_space);
+         */
+        
         // collect test data
         extractSamples(imageDataLeft, leftX, leftY, trainLeftFeatures, trainLeftDV);
         extractSamples(imageDataRight, rightX, rightY, trainRightFeatures, trainRightDV);
+        
         
         if (leftX < 0 || leftY < 0) {
             noOoiCount++;
@@ -2015,7 +3473,7 @@ public:
         // do left
         VVD testFeatures;
         VD testDV;
-        extractSamples(imageDataLeft, -1, -1, testFeatures, testDV);
+        extractLabeledSamples(imageDataLeft, -1, -1, testFeatures, testDV);
         
         VD res = rfLeft.predict(testFeatures, conf);
         pair<int, int> left = extractCoordinates(res[0]);
@@ -2023,7 +3481,7 @@ public:
         // do right
         testFeatures.clear();
         testDV.clear();
-        extractSamples(imageDataRight, -1, -1, testFeatures, testDV);
+        extractLabeledSamples(imageDataRight, -1, -1, testFeatures, testDV);
         
         res = rfRight.predict(testFeatures, conf);
         pair<int, int> right = extractCoordinates(res[0]);
