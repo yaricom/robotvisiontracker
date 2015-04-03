@@ -1825,206 +1825,634 @@ private:
 //=============================================================================================
 //
 //-----------------------------Start TRON------------------------------------------------------
-#ifdef __cplusplus
-extern "C" {
+typedef struct { float r, i; } fcomplex;
+typedef struct { double r, i; } dcomplex;
+typedef int blasbool;
+
+#ifdef F2C_COMPAT
+
+void cdotc_(fcomplex *dotval, int *n, fcomplex *cx, int *incx,
+            fcomplex *cy, int *incy);
+
+void cdotu_(fcomplex *dotval, int *n, fcomplex *cx, int *incx,
+            fcomplex *cy, int *incy);
+
+double sasum_(int *n, float *sx, int *incx);
+
+double scasum_(int *n, fcomplex *cx, int *incx);
+
+double scnrm2_(int *n, fcomplex *x, int *incx);
+
+double sdot_(int *n, float *sx, int *incx, float *sy, int *incy);
+
+double snrm2_(int *n, float *x, int *incx);
+
+void zdotc_(dcomplex *dotval, int *n, dcomplex *cx, int *incx,
+            dcomplex *cy, int *incy);
+
+void zdotu_(dcomplex *dotval, int *n, dcomplex *cx, int *incx,
+            dcomplex *cy, int *incy);
+
+#else
+
+fcomplex cdotc_(int *n, fcomplex *cx, int *incx, fcomplex *cy, int *incy);
+
+fcomplex cdotu_(int *n, fcomplex *cx, int *incx, fcomplex *cy, int *incy);
+
+float sasum_(int *n, float *sx, int *incx);
+
+float scasum_(int *n, fcomplex *cx, int *incx);
+
+float scnrm2_(int *n, fcomplex *x, int *incx);
+
+float sdot_(int *n, float *sx, int *incx, float *sy, int *incy);
+
+float snrm2_(int *n, float *x, int *incx);
+
+dcomplex zdotc_(int *n, dcomplex *cx, int *incx, dcomplex *cy, int *incy);
+
+dcomplex zdotu_(int *n, dcomplex *cx, int *incx, dcomplex *cy, int *incy);
+
 #endif
-    int dscal_(int *n, double *sa, double *sx, int *incx) {
-        long int i, m, nincx, nn, iincx;
-        double ssa;
-        
-        /* scales a vector by a constant.
-         uses unrolled loops for increment equal to 1.
-         jack dongarra, linpack, 3/11/78.
-         modified 3/93 to return if incx .le. 0.
-         modified 12/3/93, array(1) declarations changed to array(*) */
-        
-        /* Dereference inputs */
-        nn = *n;
-        iincx = *incx;
-        ssa = *sa;
-        
-        if (nn > 0 && iincx > 0)
+
+/* Remaining functions listed in alphabetical order */
+
+int caxpy_(int *n, fcomplex *ca, fcomplex *cx, int *incx, fcomplex *cy,
+           int *incy);
+
+int ccopy_(int *n, fcomplex *cx, int *incx, fcomplex *cy, int *incy);
+
+int cgbmv_(char *trans, int *m, int *n, int *kl, int *ku,
+           fcomplex *alpha, fcomplex *a, int *lda, fcomplex *x, int *incx,
+           fcomplex *beta, fcomplex *y, int *incy);
+
+int cgemm_(char *transa, char *transb, int *m, int *n, int *k,
+           fcomplex *alpha, fcomplex *a, int *lda, fcomplex *b, int *ldb,
+           fcomplex *beta, fcomplex *c, int *ldc);
+
+int cgemv_(char *trans, int *m, int *n, fcomplex *alpha, fcomplex *a,
+           int *lda, fcomplex *x, int *incx, fcomplex *beta, fcomplex *y,
+           int *incy);
+
+int cgerc_(int *m, int *n, fcomplex *alpha, fcomplex *x, int *incx,
+           fcomplex *y, int *incy, fcomplex *a, int *lda);
+
+int cgeru_(int *m, int *n, fcomplex *alpha, fcomplex *x, int *incx,
+           fcomplex *y, int *incy, fcomplex *a, int *lda);
+
+int chbmv_(char *uplo, int *n, int *k, fcomplex *alpha, fcomplex *a,
+           int *lda, fcomplex *x, int *incx, fcomplex *beta, fcomplex *y,
+           int *incy);
+
+int chemm_(char *side, char *uplo, int *m, int *n, fcomplex *alpha,
+           fcomplex *a, int *lda, fcomplex *b, int *ldb, fcomplex *beta,
+           fcomplex *c, int *ldc);
+
+int chemv_(char *uplo, int *n, fcomplex *alpha, fcomplex *a, int *lda,
+           fcomplex *x, int *incx, fcomplex *beta, fcomplex *y, int *incy);
+
+int cher_(char *uplo, int *n, float *alpha, fcomplex *x, int *incx,
+          fcomplex *a, int *lda);
+
+int cher2_(char *uplo, int *n, fcomplex *alpha, fcomplex *x, int *incx,
+           fcomplex *y, int *incy, fcomplex *a, int *lda);
+
+int cher2k_(char *uplo, char *trans, int *n, int *k, fcomplex *alpha,
+            fcomplex *a, int *lda, fcomplex *b, int *ldb, float *beta,
+            fcomplex *c, int *ldc);
+
+int cherk_(char *uplo, char *trans, int *n, int *k, float *alpha,
+           fcomplex *a, int *lda, float *beta, fcomplex *c, int *ldc);
+
+int chpmv_(char *uplo, int *n, fcomplex *alpha, fcomplex *ap, fcomplex *x,
+           int *incx, fcomplex *beta, fcomplex *y, int *incy);
+
+int chpr_(char *uplo, int *n, float *alpha, fcomplex *x, int *incx,
+          fcomplex *ap);
+
+int chpr2_(char *uplo, int *n, fcomplex *alpha, fcomplex *x, int *incx,
+           fcomplex *y, int *incy, fcomplex *ap);
+
+int crotg_(fcomplex *ca, fcomplex *cb, float *c, fcomplex *s);
+
+int cscal_(int *n, fcomplex *ca, fcomplex *cx, int *incx);
+
+int csscal_(int *n, float *sa, fcomplex *cx, int *incx);
+
+int cswap_(int *n, fcomplex *cx, int *incx, fcomplex *cy, int *incy);
+
+int csymm_(char *side, char *uplo, int *m, int *n, fcomplex *alpha,
+           fcomplex *a, int *lda, fcomplex *b, int *ldb, fcomplex *beta,
+           fcomplex *c, int *ldc);
+
+int csyr2k_(char *uplo, char *trans, int *n, int *k, fcomplex *alpha,
+            fcomplex *a, int *lda, fcomplex *b, int *ldb, fcomplex *beta,
+            fcomplex *c, int *ldc);
+
+int csyrk_(char *uplo, char *trans, int *n, int *k, fcomplex *alpha,
+           fcomplex *a, int *lda, fcomplex *beta, fcomplex *c, int *ldc);
+
+int ctbmv_(char *uplo, char *trans, char *diag, int *n, int *k,
+           fcomplex *a, int *lda, fcomplex *x, int *incx);
+
+int ctbsv_(char *uplo, char *trans, char *diag, int *n, int *k,
+           fcomplex *a, int *lda, fcomplex *x, int *incx);
+
+int ctpmv_(char *uplo, char *trans, char *diag, int *n, fcomplex *ap,
+           fcomplex *x, int *incx);
+
+int ctpsv_(char *uplo, char *trans, char *diag, int *n, fcomplex *ap,
+           fcomplex *x, int *incx);
+
+int ctrmm_(char *side, char *uplo, char *transa, char *diag, int *m,
+           int *n, fcomplex *alpha, fcomplex *a, int *lda, fcomplex *b,
+           int *ldb);
+
+int ctrmv_(char *uplo, char *trans, char *diag, int *n, fcomplex *a,
+           int *lda, fcomplex *x, int *incx);
+
+int ctrsm_(char *side, char *uplo, char *transa, char *diag, int *m,
+           int *n, fcomplex *alpha, fcomplex *a, int *lda, fcomplex *b,
+           int *ldb);
+
+int ctrsv_(char *uplo, char *trans, char *diag, int *n, fcomplex *a,
+           int *lda, fcomplex *x, int *incx);
+
+int daxpy_(int *n, double *sa, double *sx, int *incx, double *sy,
+           int *incy);
+
+int dcopy_(int *n, double *sx, int *incx, double *sy, int *incy);
+
+int dgbmv_(char *trans, int *m, int *n, int *kl, int *ku,
+           double *alpha, double *a, int *lda, double *x, int *incx,
+           double *beta, double *y, int *incy);
+
+int dgemm_(char *transa, char *transb, int *m, int *n, int *k,
+           double *alpha, double *a, int *lda, double *b, int *ldb,
+           double *beta, double *c, int *ldc);
+
+int dgemv_(char *trans, int *m, int *n, double *alpha, double *a,
+           int *lda, double *x, int *incx, double *beta, double *y,
+           int *incy);
+
+int dger_(int *m, int *n, double *alpha, double *x, int *incx,
+          double *y, int *incy, double *a, int *lda);
+
+int drot_(int *n, double *sx, int *incx, double *sy, int *incy,
+          double *c, double *s);
+
+int drotg_(double *sa, double *sb, double *c, double *s);
+
+int dsbmv_(char *uplo, int *n, int *k, double *alpha, double *a,
+           int *lda, double *x, int *incx, double *beta, double *y,
+           int *incy);
+
+int dscal_(int *n, double *sa, double *sx, int *incx);
+
+int dspmv_(char *uplo, int *n, double *alpha, double *ap, double *x,
+           int *incx, double *beta, double *y, int *incy);
+
+int dspr_(char *uplo, int *n, double *alpha, double *x, int *incx,
+          double *ap);
+
+int dspr2_(char *uplo, int *n, double *alpha, double *x, int *incx,
+           double *y, int *incy, double *ap);
+
+int dswap_(int *n, double *sx, int *incx, double *sy, int *incy);
+
+int dsymm_(char *side, char *uplo, int *m, int *n, double *alpha,
+           double *a, int *lda, double *b, int *ldb, double *beta,
+           double *c, int *ldc);
+
+int dsymv_(char *uplo, int *n, double *alpha, double *a, int *lda,
+           double *x, int *incx, double *beta, double *y, int *incy);
+
+int dsyr_(char *uplo, int *n, double *alpha, double *x, int *incx,
+          double *a, int *lda);
+
+int dsyr2_(char *uplo, int *n, double *alpha, double *x, int *incx,
+           double *y, int *incy, double *a, int *lda);
+
+int dsyr2k_(char *uplo, char *trans, int *n, int *k, double *alpha,
+            double *a, int *lda, double *b, int *ldb, double *beta,
+            double *c, int *ldc);
+
+int dsyrk_(char *uplo, char *trans, int *n, int *k, double *alpha,
+           double *a, int *lda, double *beta, double *c, int *ldc);
+
+int dtbmv_(char *uplo, char *trans, char *diag, int *n, int *k,
+           double *a, int *lda, double *x, int *incx);
+
+int dtbsv_(char *uplo, char *trans, char *diag, int *n, int *k,
+           double *a, int *lda, double *x, int *incx);
+
+int dtpmv_(char *uplo, char *trans, char *diag, int *n, double *ap,
+           double *x, int *incx);
+
+int dtpsv_(char *uplo, char *trans, char *diag, int *n, double *ap,
+           double *x, int *incx);
+
+int dtrmm_(char *side, char *uplo, char *transa, char *diag, int *m,
+           int *n, double *alpha, double *a, int *lda, double *b,
+           int *ldb);
+
+int dtrmv_(char *uplo, char *trans, char *diag, int *n, double *a,
+           int *lda, double *x, int *incx);
+
+int dtrsm_(char *side, char *uplo, char *transa, char *diag, int *m,
+           int *n, double *alpha, double *a, int *lda, double *b,
+           int *ldb);
+
+int dtrsv_(char *uplo, char *trans, char *diag, int *n, double *a,
+           int *lda, double *x, int *incx);
+
+
+int saxpy_(int *n, float *sa, float *sx, int *incx, float *sy, int *incy);
+
+int scopy_(int *n, float *sx, int *incx, float *sy, int *incy);
+
+int sgbmv_(char *trans, int *m, int *n, int *kl, int *ku,
+           float *alpha, float *a, int *lda, float *x, int *incx,
+           float *beta, float *y, int *incy);
+
+int sgemm_(char *transa, char *transb, int *m, int *n, int *k,
+           float *alpha, float *a, int *lda, float *b, int *ldb,
+           float *beta, float *c, int *ldc);
+
+int sgemv_(char *trans, int *m, int *n, float *alpha, float *a,
+           int *lda, float *x, int *incx, float *beta, float *y,
+           int *incy);
+
+int sger_(int *m, int *n, float *alpha, float *x, int *incx,
+          float *y, int *incy, float *a, int *lda);
+
+int srot_(int *n, float *sx, int *incx, float *sy, int *incy,
+          float *c, float *s);
+
+int srotg_(float *sa, float *sb, float *c, float *s);
+
+int ssbmv_(char *uplo, int *n, int *k, float *alpha, float *a,
+           int *lda, float *x, int *incx, float *beta, float *y,
+           int *incy);
+
+int sscal_(int *n, float *sa, float *sx, int *incx);
+
+int sspmv_(char *uplo, int *n, float *alpha, float *ap, float *x,
+           int *incx, float *beta, float *y, int *incy);
+
+int sspr_(char *uplo, int *n, float *alpha, float *x, int *incx,
+          float *ap);
+
+int sspr2_(char *uplo, int *n, float *alpha, float *x, int *incx,
+           float *y, int *incy, float *ap);
+
+int sswap_(int *n, float *sx, int *incx, float *sy, int *incy);
+
+int ssymm_(char *side, char *uplo, int *m, int *n, float *alpha,
+           float *a, int *lda, float *b, int *ldb, float *beta,
+           float *c, int *ldc);
+
+int ssymv_(char *uplo, int *n, float *alpha, float *a, int *lda,
+           float *x, int *incx, float *beta, float *y, int *incy);
+
+int ssyr_(char *uplo, int *n, float *alpha, float *x, int *incx,
+          float *a, int *lda);
+
+int ssyr2_(char *uplo, int *n, float *alpha, float *x, int *incx,
+           float *y, int *incy, float *a, int *lda);
+
+int ssyr2k_(char *uplo, char *trans, int *n, int *k, float *alpha,
+            float *a, int *lda, float *b, int *ldb, float *beta,
+            float *c, int *ldc);
+
+int ssyrk_(char *uplo, char *trans, int *n, int *k, float *alpha,
+           float *a, int *lda, float *beta, float *c, int *ldc);
+
+int stbmv_(char *uplo, char *trans, char *diag, int *n, int *k,
+           float *a, int *lda, float *x, int *incx);
+
+int stbsv_(char *uplo, char *trans, char *diag, int *n, int *k,
+           float *a, int *lda, float *x, int *incx);
+
+int stpmv_(char *uplo, char *trans, char *diag, int *n, float *ap,
+           float *x, int *incx);
+
+int stpsv_(char *uplo, char *trans, char *diag, int *n, float *ap,
+           float *x, int *incx);
+
+int strmm_(char *side, char *uplo, char *transa, char *diag, int *m,
+           int *n, float *alpha, float *a, int *lda, float *b,
+           int *ldb);
+
+int strmv_(char *uplo, char *trans, char *diag, int *n, float *a,
+           int *lda, float *x, int *incx);
+
+int strsm_(char *side, char *uplo, char *transa, char *diag, int *m,
+           int *n, float *alpha, float *a, int *lda, float *b,
+           int *ldb);
+
+int strsv_(char *uplo, char *trans, char *diag, int *n, float *a,
+           int *lda, float *x, int *incx);
+
+int zaxpy_(int *n, dcomplex *ca, dcomplex *cx, int *incx, dcomplex *cy,
+           int *incy);
+
+int zcopy_(int *n, dcomplex *cx, int *incx, dcomplex *cy, int *incy);
+
+int zdscal_(int *n, double *sa, dcomplex *cx, int *incx);
+
+int zgbmv_(char *trans, int *m, int *n, int *kl, int *ku,
+           dcomplex *alpha, dcomplex *a, int *lda, dcomplex *x, int *incx,
+           dcomplex *beta, dcomplex *y, int *incy);
+
+int zgemm_(char *transa, char *transb, int *m, int *n, int *k,
+           dcomplex *alpha, dcomplex *a, int *lda, dcomplex *b, int *ldb,
+           dcomplex *beta, dcomplex *c, int *ldc);
+
+int zgemv_(char *trans, int *m, int *n, dcomplex *alpha, dcomplex *a,
+           int *lda, dcomplex *x, int *incx, dcomplex *beta, dcomplex *y,
+           int *incy);
+
+int zgerc_(int *m, int *n, dcomplex *alpha, dcomplex *x, int *incx,
+           dcomplex *y, int *incy, dcomplex *a, int *lda);
+
+int zgeru_(int *m, int *n, dcomplex *alpha, dcomplex *x, int *incx,
+           dcomplex *y, int *incy, dcomplex *a, int *lda);
+
+int zhbmv_(char *uplo, int *n, int *k, dcomplex *alpha, dcomplex *a,
+           int *lda, dcomplex *x, int *incx, dcomplex *beta, dcomplex *y,
+           int *incy);
+
+int zhemm_(char *side, char *uplo, int *m, int *n, dcomplex *alpha,
+           dcomplex *a, int *lda, dcomplex *b, int *ldb, dcomplex *beta,
+           dcomplex *c, int *ldc);
+
+int zhemv_(char *uplo, int *n, dcomplex *alpha, dcomplex *a, int *lda,
+           dcomplex *x, int *incx, dcomplex *beta, dcomplex *y, int *incy);
+
+int zher_(char *uplo, int *n, double *alpha, dcomplex *x, int *incx,
+          dcomplex *a, int *lda);
+
+int zher2_(char *uplo, int *n, dcomplex *alpha, dcomplex *x, int *incx,
+           dcomplex *y, int *incy, dcomplex *a, int *lda);
+
+int zher2k_(char *uplo, char *trans, int *n, int *k, dcomplex *alpha,
+            dcomplex *a, int *lda, dcomplex *b, int *ldb, double *beta,
+            dcomplex *c, int *ldc);
+
+int zherk_(char *uplo, char *trans, int *n, int *k, double *alpha,
+           dcomplex *a, int *lda, double *beta, dcomplex *c, int *ldc);
+
+int zhpmv_(char *uplo, int *n, dcomplex *alpha, dcomplex *ap, dcomplex *x,
+           int *incx, dcomplex *beta, dcomplex *y, int *incy);
+
+int zhpr_(char *uplo, int *n, double *alpha, dcomplex *x, int *incx,
+          dcomplex *ap);
+
+int zhpr2_(char *uplo, int *n, dcomplex *alpha, dcomplex *x, int *incx,
+           dcomplex *y, int *incy, dcomplex *ap);
+
+int zrotg_(dcomplex *ca, dcomplex *cb, double *c, dcomplex *s);
+
+int zscal_(int *n, dcomplex *ca, dcomplex *cx, int *incx);
+
+int zswap_(int *n, dcomplex *cx, int *incx, dcomplex *cy, int *incy);
+
+int zsymm_(char *side, char *uplo, int *m, int *n, dcomplex *alpha,
+           dcomplex *a, int *lda, dcomplex *b, int *ldb, dcomplex *beta,
+           dcomplex *c, int *ldc);
+
+int zsyr2k_(char *uplo, char *trans, int *n, int *k, dcomplex *alpha,
+            dcomplex *a, int *lda, dcomplex *b, int *ldb, dcomplex *beta,
+            dcomplex *c, int *ldc);
+
+int zsyrk_(char *uplo, char *trans, int *n, int *k, dcomplex *alpha,
+           dcomplex *a, int *lda, dcomplex *beta, dcomplex *c, int *ldc);
+
+int ztbmv_(char *uplo, char *trans, char *diag, int *n, int *k,
+           dcomplex *a, int *lda, dcomplex *x, int *incx);
+
+int ztbsv_(char *uplo, char *trans, char *diag, int *n, int *k,
+           dcomplex *a, int *lda, dcomplex *x, int *incx);
+
+int ztpmv_(char *uplo, char *trans, char *diag, int *n, dcomplex *ap,
+           dcomplex *x, int *incx);
+
+int ztpsv_(char *uplo, char *trans, char *diag, int *n, dcomplex *ap,
+           dcomplex *x, int *incx);
+
+int ztrmm_(char *side, char *uplo, char *transa, char *diag, int *m,
+           int *n, dcomplex *alpha, dcomplex *a, int *lda, dcomplex *b,
+           int *ldb);
+
+int ztrmv_(char *uplo, char *trans, char *diag, int *n, dcomplex *a,
+           int *lda, dcomplex *x, int *incx);
+
+int ztrsm_(char *side, char *uplo, char *transa, char *diag, int *m,
+           int *n, dcomplex *alpha, dcomplex *a, int *lda, dcomplex *b,
+           int *ldb);
+
+int ztrsv_(char *uplo, char *trans, char *diag, int *n, dcomplex *a,
+           int *lda, dcomplex *x, int *incx);
+
+
+
+int dscal_(int *n, double *sa, double *sx, int *incx) {
+    long int i, m, nincx, nn, iincx;
+    double ssa;
+    
+    /* scales a vector by a constant.
+     uses unrolled loops for increment equal to 1.
+     jack dongarra, linpack, 3/11/78.
+     modified 3/93 to return if incx .le. 0.
+     modified 12/3/93, array(1) declarations changed to array(*) */
+    
+    /* Dereference inputs */
+    nn = *n;
+    iincx = *incx;
+    ssa = *sa;
+    
+    if (nn > 0 && iincx > 0)
+    {
+        if (iincx == 1) /* code for increment equal to 1 */
         {
-            if (iincx == 1) /* code for increment equal to 1 */
+            m = nn-4;
+            for (i = 0; i < m; i += 5)
             {
-                m = nn-4;
-                for (i = 0; i < m; i += 5)
-                {
-                    sx[i] = ssa * sx[i];
-                    sx[i+1] = ssa * sx[i+1];
-                    sx[i+2] = ssa * sx[i+2];
-                    sx[i+3] = ssa * sx[i+3];
-                    sx[i+4] = ssa * sx[i+4];
-                }
-                for ( ; i < nn; ++i) /* clean-up loop */
-                    sx[i] = ssa * sx[i];
+                sx[i] = ssa * sx[i];
+                sx[i+1] = ssa * sx[i+1];
+                sx[i+2] = ssa * sx[i+2];
+                sx[i+3] = ssa * sx[i+3];
+                sx[i+4] = ssa * sx[i+4];
             }
-            else /* code for increment not equal to 1 */
-            {
-                nincx = nn * iincx;
-                for (i = 0; i < nincx; i += iincx)
-                    sx[i] = ssa * sx[i];
-            }
+            for ( ; i < nn; ++i) /* clean-up loop */
+                sx[i] = ssa * sx[i];
         }
-        
-        return 0;
+        else /* code for increment not equal to 1 */
+        {
+            nincx = nn * iincx;
+            for (i = 0; i < nincx; i += iincx)
+                sx[i] = ssa * sx[i];
+        }
     }
     
-    double dnrm2_(int *n, double *x, int *incx) {
-        long int ix, nn, iincx;
-        double norm, scale, absxi, ssq, temp;
-        
-        /*  DNRM2 returns the euclidean norm of a vector via the function
-         name, so that
-         
-         DNRM2 := sqrt( x'*x )
-         
-         -- This version written on 25-October-1982.
-         Modified on 14-October-1993 to inline the call to SLASSQ.
-         Sven Hammarling, Nag Ltd.   */
-        
-        /* Dereference inputs */
-        nn = *n;
-        iincx = *incx;
-        
-        if( nn > 0 && iincx > 0 )
+    return 0;
+}
+
+double dnrm2_(int *n, double *x, int *incx) {
+    long int ix, nn, iincx;
+    double norm, scale, absxi, ssq, temp;
+    
+    /*  DNRM2 returns the euclidean norm of a vector via the function
+     name, so that
+     
+     DNRM2 := sqrt( x'*x )
+     
+     -- This version written on 25-October-1982.
+     Modified on 14-October-1993 to inline the call to SLASSQ.
+     Sven Hammarling, Nag Ltd.   */
+    
+    /* Dereference inputs */
+    nn = *n;
+    iincx = *incx;
+    
+    if( nn > 0 && iincx > 0 )
+    {
+        if (nn == 1)
         {
-            if (nn == 1)
-            {
-                norm = fabs(x[0]);
-            }
-            else
-            {
-                scale = 0.0;
-                ssq = 1.0;
-                
-                /* The following loop is equivalent to this call to the LAPACK
-                 auxiliary routine:   CALL SLASSQ( N, X, INCX, SCALE, SSQ ) */
-                
-                for (ix=(nn-1)*iincx; ix>=0; ix-=iincx)
-                {
-                    if (x[ix] != 0.0)
-                    {
-                        absxi = fabs(x[ix]);
-                        if (scale < absxi)
-                        {
-                            temp = scale / absxi;
-                            ssq = ssq * (temp * temp) + 1.0;
-                            scale = absxi;
-                        }
-                        else
-                        {
-                            temp = absxi / scale;
-                            ssq += temp * temp;
-                        }
-                    }
-                }
-                norm = scale * sqrt(ssq);
-            }
+            norm = fabs(x[0]);
         }
         else
-            norm = 0.0;
-        
-        return norm;
-        
-    }
-    
-    double ddot_(int *n, double *sx, int *incx, double *sy, int *incy) {
-        long int i, m, nn, iincx, iincy;
-        double stemp;
-        long int ix, iy;
-        
-        /* forms the dot product of two vectors.
-         uses unrolled loops for increments equal to one.
-         jack dongarra, linpack, 3/11/78.
-         modified 12/3/93, array(1) declarations changed to array(*) */
-        
-        /* Dereference inputs */
-        nn = *n;
-        iincx = *incx;
-        iincy = *incy;
-        
-        stemp = 0.0;
-        if (nn > 0)
         {
-            if (iincx == 1 && iincy == 1) /* code for both increments equal to 1 */
-            {
-                m = nn-4;
-                for (i = 0; i < m; i += 5)
-                    stemp += sx[i] * sy[i] + sx[i+1] * sy[i+1] + sx[i+2] * sy[i+2] +
-                    sx[i+3] * sy[i+3] + sx[i+4] * sy[i+4];
-                
-                for ( ; i < nn; i++)        /* clean-up loop */
-                    stemp += sx[i] * sy[i];
-            }
-            else /* code for unequal increments or equal increments not equal to 1 */
-            {
-                ix = 0;
-                iy = 0;
-                if (iincx < 0)
-                    ix = (1 - nn) * iincx;
-                if (iincy < 0)
-                    iy = (1 - nn) * iincy;
-                for (i = 0; i < nn; i++)
+            scale = 0.0;
+            ssq = 1.0;
+            
+            /* The following loop is equivalent to this call to the LAPACK
+             auxiliary routine:   CALL SLASSQ( N, X, INCX, SCALE, SSQ ) */
+            
+            for (ix=(nn-1)*iincx; ix>=0; ix-=iincx) {
+                if (x[ix] != 0.0 && !isnan(x[ix]))
                 {
-                    stemp += sx[ix] * sy[iy];
-                    ix += iincx;
-                    iy += iincy;
+                    absxi = fabs(x[ix]);
+                    if (scale < absxi)
+                    {
+                        temp = scale / absxi;
+                        ssq = ssq * (temp * temp) + 1.0;
+                        scale = absxi;
+                    }
+                    else if (scale != 0.0)
+                    {
+                        temp = absxi / scale;
+                        ssq += temp * temp;
+                    }
+                }
+                if (isnan(ssq)) {
+                    Printf("Epic fail. ssq is NaN");
                 }
             }
+            norm = scale * sqrt(ssq);
         }
-        
-        return stemp;
     }
+    else
+        norm = 0.0;
     
-    int daxpy_(int *n, double *sa, double *sx, int *incx, double *sy, int *incy) {
-        long int i, m, ix, iy, nn, iincx, iincy;
-        register double ssa;
-        
-        /* constant times a vector plus a vector.
-         uses unrolled loop for increments equal to one.
-         jack dongarra, linpack, 3/11/78.
-         modified 12/3/93, array(1) declarations changed to array(*) */
-        
-        /* Dereference inputs */
-        nn = *n;
-        ssa = *sa;
-        iincx = *incx;
-        iincy = *incy;
-        
-        if( nn > 0 && ssa != 0.0 )
-        {
-            if (iincx == 1 && iincy == 1) /* code for both increments equal to 1 */
-            {
-                m = nn-3;
-                for (i = 0; i < m; i += 4)
-                {
-                    sy[i] += ssa * sx[i];
-                    sy[i+1] += ssa * sx[i+1];
-                    sy[i+2] += ssa * sx[i+2];
-                    sy[i+3] += ssa * sx[i+3];
-                }
-                for ( ; i < nn; ++i) /* clean-up loop */
-                    sy[i] += ssa * sx[i];
-            }
-            else /* code for unequal increments or equal increments not equal to 1 */
-            {
-                ix = iincx >= 0 ? 0 : (1 - nn) * iincx;
-                iy = iincy >= 0 ? 0 : (1 - nn) * iincy;
-                for (i = 0; i < nn; i++)
-                {
-                    sy[iy] += ssa * sx[ix];
-                    ix += iincx;
-                    iy += iincy;
-                }
-            }
-        }
-        
-        return 0;
-    }
-#ifdef __cplusplus
+    return norm;
+    
 }
-#endif
+
+double ddot_(int *n, double *sx, int *incx, double *sy, int *incy) {
+    long int i, m, nn, iincx, iincy;
+    double stemp;
+    long int ix, iy;
+    
+    /* forms the dot product of two vectors.
+     uses unrolled loops for increments equal to one.
+     jack dongarra, linpack, 3/11/78.
+     modified 12/3/93, array(1) declarations changed to array(*) */
+    
+    /* Dereference inputs */
+    nn = *n;
+    iincx = *incx;
+    iincy = *incy;
+    
+    stemp = 0.0;
+    if (nn > 0)
+    {
+        if (iincx == 1 && iincy == 1) /* code for both increments equal to 1 */
+        {
+            m = nn-4;
+            for (i = 0; i < m; i += 5)
+                stemp += sx[i] * sy[i] + sx[i+1] * sy[i+1] + sx[i+2] * sy[i+2] +
+                sx[i+3] * sy[i+3] + sx[i+4] * sy[i+4];
+            
+            for ( ; i < nn; i++)        /* clean-up loop */
+                stemp += sx[i] * sy[i];
+        }
+        else /* code for unequal increments or equal increments not equal to 1 */
+        {
+            ix = 0;
+            iy = 0;
+            if (iincx < 0)
+                ix = (1 - nn) * iincx;
+            if (iincy < 0)
+                iy = (1 - nn) * iincy;
+            for (i = 0; i < nn; i++)
+            {
+                stemp += sx[ix] * sy[iy];
+                ix += iincx;
+                iy += iincy;
+            }
+        }
+    }
+    
+    return stemp;
+}
+
+int daxpy_(int *n, double *sa, double *sx, int *incx, double *sy, int *incy) {
+    long int i, m, ix, iy, nn, iincx, iincy;
+    register double ssa;
+    
+    /* constant times a vector plus a vector.
+     uses unrolled loop for increments equal to one.
+     jack dongarra, linpack, 3/11/78.
+     modified 12/3/93, array(1) declarations changed to array(*) */
+    
+    /* Dereference inputs */
+    nn = *n;
+    ssa = *sa;
+    iincx = *incx;
+    iincy = *incy;
+    
+    if( nn > 0 && ssa != 0.0 )
+    {
+        if (iincx == 1 && iincy == 1) /* code for both increments equal to 1 */
+        {
+            m = nn-3;
+            for (i = 0; i < m; i += 4)
+            {
+                sy[i] += ssa * sx[i];
+                sy[i+1] += ssa * sx[i+1];
+                sy[i+2] += ssa * sx[i+2];
+                sy[i+3] += ssa * sx[i+3];
+            }
+            for ( ; i < nn; ++i) /* clean-up loop */
+                sy[i] += ssa * sx[i];
+        }
+        else /* code for unequal increments or equal increments not equal to 1 */
+        {
+            ix = iincx >= 0 ? 0 : (1 - nn) * iincx;
+            iy = iincy >= 0 ? 0 : (1 - nn) * iincy;
+            for (i = 0; i < nn; i++)
+            {
+                sy[iy] += ssa * sx[ix];
+                ix += iincx;
+                iy += iincy;
+            }
+        }
+    }
+    
+    return 0;
+}
 
 static void default_print(const char *buf)
 {
@@ -2153,6 +2581,11 @@ void TRON::tron(double *w)
         
         info("iter %2d act %5.3e pre %5.3e delta %5.3e f %5.3e |g| %5.3e CG %3d\n", iter, actred, prered, delta, f, gnorm, cg_iter);
         
+        if (isnan(actred)) {
+            Printf("Epic failure in TRON::tron. Skipping.\n");
+            break;
+        }
+        
         if (actred > eta0*prered)
         {
             iter++;
@@ -2203,7 +2636,10 @@ int TRON::trcg(double delta, double *g, double *s, double *r)
         r[i] = -g[i];
         d[i] = r[i];
     }
-    cgtol = 0.1*dnrm2_(&n, g, &inc);
+    cgtol = 0.1 * dnrm2_(&n, g, &inc);
+    if (isnan(cgtol)) {
+        Printf("Epic fail. cgtol is NaN");
+    }
     
     int cg_iter = 0;
     rTr = ddot_(&n, r, &inc, r, &inc);
@@ -2566,8 +3002,14 @@ void l2r_l2_svc_fun::grad(double *w, double *g)
         }
     subXTv(z, g);
     
-    for(i=0;i<w_size;i++)
+    for(i=0;i<w_size;i++) {
         g[i] = w[i] + 2*g[i];
+        
+        if (isnan(g[i])) {
+            Printf("Epic fail at: %i, w: %.2f, g: %.2f", i, w[i], g[i]);
+            g[i] = 0;
+        }
+    }
 }
 
 int l2r_l2_svc_fun::get_nr_variable(void)
@@ -3235,20 +3677,21 @@ void readProblem(const VVD &samples, const VD &dv, struct problem *prob, struct 
             x_space[j].index = k + 1;// starts from 1
             x_space[j].value = samples[i][k];
             
-            Printf("%i : %.2f\n", x_space[j].index, x_space[j].value);
+//            Printf("%i : %.2f\n", x_space[j].index, x_space[j].value);
             
             ++j;
         }
         // mark end of row
         x_space[j++].index = -1;
     }
+    Printf("Problem parsed, samples: %i, features: %i\n", prob->l, prob->n);
 }
 
 //
 //---------------------------------------------------------------------------------------------
 //
 //=============================================================================================
-const static int SAMPLE_SIZE = 64;//2;//8;//16;//32;
+const static int SAMPLE_SIZE = 32;//2;//8;//16;//32;
 const static int SAMPLE_SIZE_DIV_2 = SAMPLE_SIZE / 2;
 const static int SAMPLE_SIZE_POW = SAMPLE_SIZE * SAMPLE_SIZE;
 const static int XSAMPLES = 640 / SAMPLE_SIZE;
@@ -3256,19 +3699,47 @@ const static int YSAMPLES = 480 / SAMPLE_SIZE;
 
 HoG hogoperator;
 
-const static int HOG_WX = 8;
-const static int HOG_WY = 8;
+const static int HOG_WX = 4;
+const static int HOG_WY = 4;
 const static int HOG_BIN = 10;
+
+pair<int, int>detectRoi(const struct model *model, const struct problem *prob) {
+    Printf("Start ROI with model: [classes: %i, features: %i, bias: %.4f]\n", model->nr_class, model->nr_feature, model->bias);
+    int rows = prob->l;
+    VD labels(rows, 0);
+    int roiIndex = -1;
+    double maxLabel = -1;
+    for (int i = 0; i < rows; i++) {
+        double label = predict(model, prob->x[i]);
+        labels[i] = label;
+        if (label > maxLabel) {
+            maxLabel = label;
+            roiIndex = i;
+        }
+    }
+    int x = -1;
+    int y = -1;
+    if (roiIndex >= 0 && maxLabel > 0) {
+        y = roiIndex / XSAMPLES;
+        x = roiIndex % XSAMPLES;
+        
+        y += SAMPLE_SIZE_DIV_2;
+        x += SAMPLE_SIZE_DIV_2;
+        
+        Printf("ROI at [%i, %i], index: %i, label: %i\n", x, y, roiIndex, maxLabel);
+    }
+    return pair<int, int>(x, y);
+}
 
 void extractSampleHOG(const VI &img, const int x, const int y, VD &descriptor) {
     VVD res(SAMPLE_SIZE, VD(SAMPLE_SIZE, 0));
     int index = x + y * 640;
     for (int j = 0; j < SAMPLE_SIZE; j++) {
         VD row(SAMPLE_SIZE, 0);
-//        copy(img.begin() + index, img.begin() + index + SAMPLE_SIZE, row.begin());
-        for (int i = 0; i < SAMPLE_SIZE; i++) {
-            row[i] = img[index + i] / 16777216.0;// grayscale
-        }
+        copy(img.begin() + index, img.begin() + index + SAMPLE_SIZE, row.begin());
+//        for (int i = 0; i < SAMPLE_SIZE; i++) {
+//            row[i] = img[index + i] / 16777216.0;// grayscale
+//        }
         index += 640;
         // add row
         res[j] = row;
@@ -3298,8 +3769,10 @@ void extractLabeledSamples(const VI &img, const int ooiX, const int ooiY, VVD &f
     int sCount = 0, positives = 0;
     for (int ys = 0; ys < YSAMPLES; ys++) {
         for (int xs = 0; xs < XSAMPLES; xs++) {
-            VD sample;
-            extractSampleHOG(img, xs * SAMPLE_SIZE, ys * SAMPLE_SIZE, sample);
+//            VD sample;
+//            extractSampleHOG(img, xs * SAMPLE_SIZE, ys * SAMPLE_SIZE, sample);
+            
+            VD sample = extractSample(img, xs * SAMPLE_SIZE, ys * SAMPLE_SIZE);
             features.push_back(sample);
             sCount++;
             if (hasOOI && (ooiX >= xs * SAMPLE_SIZE && ooiX < xs * SAMPLE_SIZE + SAMPLE_SIZE
@@ -3308,7 +3781,7 @@ void extractLabeledSamples(const VI &img, const int ooiX, const int ooiY, VVD &f
                 positives++;
             } else {
                 // not found
-                dv.push_back(0.0);
+                dv.push_back(-1.0);
             }
         }
     }
@@ -3424,11 +3897,14 @@ class RobotVisionTracker {
     
     parameter param;
     
+    problem prob;
+    feature_node *x_space;
+    
 public:
     RobotVisionTracker() {
         // init parameters
-        param.solver_type = L2R_LR;
-        //        param.solver_type = L2R_L2LOSS_SVC;
+//        param.solver_type = L2R_LR;
+        param.solver_type = L2R_L2LOSS_SVC;
         
         param.eps = 0.01;
         param.C = 1; // !
@@ -3440,29 +3916,45 @@ public:
     
     int training(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight, const int leftX, const int leftY, const int rightX, const int rightY) {
         
-        Printf("%i : %i, left[%i, %i], right[%i, %i]\n", videoIndex, frameIndex, leftX, leftY, rightX, rightY);
-        /*
-         // collect test data
-         extractLabeledSamples(imageDataLeft, leftX, leftY, trainLeftFeatures, trainLeftDV);
-         extractLabeledSamples(imageDataRight, rightX, rightY, trainRightFeatures, trainRightDV);
-         
-         // do train
-         problem prob;
-         feature_node *x_space;
-         readProblem(trainLeftFeatures, trainLeftDV, &prob, x_space);
-         if (!modelLeft) {
-         modelLeft = train(&prob, &param);
-         } else {
-         modelLeft = warm_start_train(&prob, &param, modelLeft);
-         }
-         free(prob.y);
-         free(prob.x);
-         free(x_space);
-         */
+        Printf("Train: %i : %i, left[%i, %i], right[%i, %i]\n", videoIndex, frameIndex, leftX, leftY, rightX, rightY);
         
         // collect test data
-        extractSamples(imageDataLeft, leftX, leftY, trainLeftFeatures, trainLeftDV);
-        extractSamples(imageDataRight, rightX, rightY, trainRightFeatures, trainRightDV);
+        extractLabeledSamples(imageDataLeft, leftX, leftY, trainLeftFeatures, trainLeftDV);
+        extractLabeledSamples(imageDataRight, rightX, rightY, trainRightFeatures, trainRightDV);
+            
+        
+        // do train left
+        readProblem(trainLeftFeatures, trainLeftDV, &prob, x_space);
+        if (!modelLeft) {
+            modelLeft = train(&prob, &param);
+        } else {
+            modelLeft = warm_start_train(&prob, &param, modelLeft);
+        }
+        Printf("Left model trained: [classes: %i, features: %i, bias: %.4f]\n", modelLeft->nr_class, modelLeft->nr_feature, modelLeft->bias);
+        free(prob.y);
+        free(prob.x);
+        free(x_space);
+        trainLeftFeatures.clear();
+        trainLeftDV.clear();
+        
+        // do train right
+        readProblem(trainRightFeatures, trainRightDV, &prob, x_space);
+        if (!modelRight) {
+            modelRight = train(&prob, &param);
+        } else {
+            modelRight = warm_start_train(&prob, &param, modelRight);
+        }
+        Printf("Right model trained: [classes: %i, features: %i, bias: %.4f]\n", modelRight->nr_class, modelRight->nr_feature, modelRight->bias);
+        free(prob.y);
+        free(prob.x);
+        free(x_space);
+        trainRightFeatures.clear();
+        trainRightDV.clear();
+        
+        
+        // collect test data
+        //        extractSamples(imageDataLeft, leftX, leftY, trainLeftFeatures, trainLeftDV);
+        //        extractSamples(imageDataRight, rightX, rightY, trainRightFeatures, trainRightDV);
         
         
         if (leftX < 0 || leftY < 0) {
@@ -3471,29 +3963,45 @@ public:
             ooiCount++;
         }
         
-        if (videoIndex == 1) {
-            return 1;
-        }
+//        if (videoIndex == 1) {
+//            return 1;
+//        }
         
         return 0;
     }
     
     VI testing(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight) {
+        Printf("Test: %i : %i\n", videoIndex, frameIndex);
+        
         // do left
+        //
         VVD testFeatures;
         VD testDV;
         extractLabeledSamples(imageDataLeft, -1, -1, testFeatures, testDV);
         
-        VD res = rfLeft.predict(testFeatures, conf);
-        pair<int, int> left = extractCoordinates(res[0]);
+//        VD res = rfLeft.predict(testFeatures, conf);
+//        pair<int, int> left = extractCoordinates(res[0]);
+        
+        readProblem(testFeatures, testDV, &prob, x_space);
+        pair<int, int>left = detectRoi(modelLeft, &prob);
+        free(prob.y);
+        free(prob.x);
+        free(x_space);
         
         // do right
+        //
         testFeatures.clear();
         testDV.clear();
         extractLabeledSamples(imageDataRight, -1, -1, testFeatures, testDV);
         
-        res = rfRight.predict(testFeatures, conf);
-        pair<int, int> right = extractCoordinates(res[0]);
+//        res = rfRight.predict(testFeatures, conf);
+//        pair<int, int> right = extractCoordinates(res[0]);
+        
+        readProblem(testFeatures, testDV, &prob, x_space);
+        pair<int, int>right = detectRoi(modelRight, &prob);
+        free(prob.y);
+        free(prob.x);
+        free(x_space);
         
         VI result = {left.first, left.second, right.first, right.second};
         return result;
@@ -3502,6 +4010,27 @@ public:
     int doneTraining() {
         Printf("Frames with OOI: %i, without OOI: %i\n", ooiCount, noOoiCount);
         
+        Printf("Left model: [classes: %i, features: %i, bias: %.4f]\n", modelLeft->nr_class, modelLeft->nr_feature, modelLeft->bias);
+        int *labels = modelLeft->label;
+        if (labels != NULL) {
+            Printf("Left labels: ");
+            for (int i = 0; i < sizeof(labels)/sizeof(labels[0]); i++) {
+                Printf("%i, ", labels[i]);
+            }
+        }
+        Printf("\n==========================\n");
+        
+        Printf("Right model: [classes: %i, features: %i, bias: %.4f]\n", modelRight->nr_class, modelRight->nr_feature, modelRight->bias);
+        labels = modelRight->label;
+        if (labels != NULL) {
+            Printf("Right labels: ");
+            for (int i = 0; i < sizeof(labels)/sizeof(labels[0]); i++) {
+                Printf("%i, ", labels[i]);
+            }
+        }
+        Printf("\n==========================\n");
+        
+        /*
         conf.nTree = 500;
         conf.mtry = 200;//400;
         
@@ -3514,7 +4043,7 @@ public:
         trainLeftDV.clear();
         trainRightFeatures.clear();
         trainRightDV.clear();
-        
+        */
         return 0;
     }
 };
