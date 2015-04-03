@@ -3248,7 +3248,7 @@ void readProblem(const VVD &samples, const VD &dv, struct problem *prob, struct 
 //---------------------------------------------------------------------------------------------
 //
 //=============================================================================================
-const static int SAMPLE_SIZE = 32;//64;//2;//8;//16;//32;
+const static int SAMPLE_SIZE = 64;//2;//8;//16;//32;
 const static int SAMPLE_SIZE_DIV_2 = SAMPLE_SIZE / 2;
 const static int SAMPLE_SIZE_POW = SAMPLE_SIZE * SAMPLE_SIZE;
 const static int XSAMPLES = 640 / SAMPLE_SIZE;
@@ -3256,8 +3256,8 @@ const static int YSAMPLES = 480 / SAMPLE_SIZE;
 
 HoG hogoperator;
 
-const static int HOG_WX = 4;
-const static int HOG_WY = 4;
+const static int HOG_WX = 8;
+const static int HOG_WY = 8;
 const static int HOG_BIN = 10;
 
 void extractSampleHOG(const VI &img, const int x, const int y, VD &descriptor) {
@@ -3265,7 +3265,10 @@ void extractSampleHOG(const VI &img, const int x, const int y, VD &descriptor) {
     int index = x + y * 640;
     for (int j = 0; j < SAMPLE_SIZE; j++) {
         VD row(SAMPLE_SIZE, 0);
-        copy(img.begin() + index, img.begin() + index + SAMPLE_SIZE, row.begin());
+//        copy(img.begin() + index, img.begin() + index + SAMPLE_SIZE, row.begin());
+        for (int i = 0; i < SAMPLE_SIZE; i++) {
+            row[i] = img[index + i] / 16777216.0;// grayscale
+        }
         index += 640;
         // add row
         res[j] = row;
@@ -3436,6 +3439,8 @@ public:
     }
     
     int training(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight, const int leftX, const int leftY, const int rightX, const int rightY) {
+        
+        Printf("%i : %i, left[%i, %i], right[%i, %i]\n", videoIndex, frameIndex, leftX, leftY, rightX, rightY);
         /*
          // collect test data
          extractLabeledSamples(imageDataLeft, leftX, leftY, trainLeftFeatures, trainLeftDV);
@@ -3466,6 +3471,10 @@ public:
             ooiCount++;
         }
         
+        if (videoIndex == 1) {
+            return 1;
+        }
+        
         return 0;
     }
     
@@ -3494,7 +3503,7 @@ public:
         Printf("Frames with OOI: %i, without OOI: %i\n", ooiCount, noOoiCount);
         
         conf.nTree = 500;
-        conf.mtry = 400;
+        conf.mtry = 200;//400;
         
         // do train
         rfLeft.train(trainLeftFeatures, trainLeftDV, conf);
