@@ -15,8 +15,6 @@
 //#define USE_REGERESSION
 
 #ifdef LOCAL
-#define SAVE_MODELS
-#define SAVE_DATA
 #include "stdc++.h"
 #else
 #include <bits/stdc++.h>
@@ -268,7 +266,6 @@ void HoG::HOGdescriptor(vector<vector<double>>& Im, vector<double>& descriptor) 
     return;
     
 }
-
 
 //
 // ----------------------------
@@ -1825,24 +1822,18 @@ private:
         Printf("replace %d, labelts %d, proxts %f\n", *replace, labelts, *proxts);
     }
 };
-//=============================================================================================
 
-
-//
-//---------------------------------------------------------------------------------------------
-//
-//=============================================================================================
-const static int SAMPLE_SIZE_HOR = 32;//2;//8;//16;//32;
-const static int SAMPLE_SIZE_VER = 48;
+const static int SAMPLE_SIZE_HOR = 2;//2;//8;//16;//32;
+const static int SAMPLE_SIZE_VER = 2;
 const static int SAMPLE_SIZE_MULT = SAMPLE_SIZE_HOR * SAMPLE_SIZE_VER;
 const static int XSAMPLES = 640 / SAMPLE_SIZE_HOR;
 const static int YSAMPLES = 480 / SAMPLE_SIZE_VER;
 
 HoG hogoperator;
 
-const static int HOG_WX = 4;
-const static int HOG_WY = 4;
-const static int HOG_BIN = 8;
+const static int HOG_WX = 5;
+const static int HOG_WY = 5;
+const static int HOG_BIN = 10;
 
 void extractSampleHOG(const VI &img, const int x, const int y, VD &descriptor) {
     VVD res(SAMPLE_SIZE_VER, VD(SAMPLE_SIZE_HOR, 0));
@@ -1868,65 +1859,7 @@ void extractSampleHOG(const VI &img, const int x, const int y, VD &descriptor) {
     hogoperator.HOGdescriptor(res, descriptor);
 }
 
-VD extractSample(const VI &img, const int x, const int y) {
-    VD res(SAMPLE_SIZE_MULT, 0);
-    int index = x + y * 640;
-    int resIndex = 0;
-    for (int j = 0; j < SAMPLE_SIZE_VER; j++) {
-        for (int i = 0; i < SAMPLE_SIZE_HOR; i++) {
-            res[resIndex++] = img[index + i] / 16777216.0;
-        }
-        index += 640;
-    }
-    return res;
-}
 
-void extractLabeledSamples(const VI &img, const int ooiX, const int ooiY, VVD &features, VD &dv) {
-    bool hasOOI = (ooiX > 0 && ooiY > 0);
-    int sCount = 0, positives = 0;
-    for (int ys = 0; ys < YSAMPLES; ys++) {
-        for (int xs = 0; xs < XSAMPLES; xs++) {
-            VD sample;
-            extractSampleHOG(img, xs * SAMPLE_SIZE_HOR, ys * SAMPLE_SIZE_VER, sample);
-            
-            //            VD sample = extractSample(img, xs * SAMPLE_SIZE_HOR, ys * SAMPLE_SIZE_VER);
-            features.push_back(sample);
-            sCount++;
-            if (hasOOI && (ooiX >= xs * SAMPLE_SIZE_HOR && ooiX < xs * SAMPLE_SIZE_HOR + SAMPLE_SIZE_HOR
-                           && ooiY >= ys * SAMPLE_SIZE_VER && ooiY < ys * SAMPLE_SIZE_VER + SAMPLE_SIZE_VER)) {
-                dv.push_back(1.0);
-                positives++;
-            } else {
-                // not found
-                dv.push_back(-1.0);
-            }
-        }
-    }
-    Printf("Extracted %i samples with %i posititves\n", sCount, positives);
-}
-
-void extractSamples(const VI &img, const int ooiX, const int ooiY, VVD &features, VD &dv) {
-    bool hasOOI = (ooiX > 0 && ooiY > 0);
-    int sCount = 0;
-    for (int ys = 0; ys < YSAMPLES; ys++) {
-        for (int xs = 0; xs < XSAMPLES; xs++) {
-            VD sample;
-            extractSampleHOG(img, xs * SAMPLE_SIZE_HOR, ys * SAMPLE_SIZE_VER, sample);
-            features.push_back(sample);
-            sCount++;
-            if (hasOOI) {
-                double dxv = (abs(ooiX - xs * SAMPLE_SIZE_HOR - SAMPLE_SIZE_HOR / 2) + 1);
-                double xv = 640.0 / dxv;
-                double yv = 480.0 / (abs(ooiY - ys * SAMPLE_SIZE_VER - SAMPLE_SIZE_VER / 2) + 1);
-                dv.push_back((xv * yv) / 100);
-            } else {
-                // not found
-                dv.push_back(-1.0);
-            }
-        }
-    }
-    Printf("Extracted %i samples\n", sCount);
-}
 
 double sampleRegion(const VI &img, const int x, const int y) {
     double res = 0;
@@ -1965,6 +1898,40 @@ void sampleRegions(const VI &img, const int ooiX, const int ooiY, VVD &features,
     //    Printf("Sampled %i regions\n", sCount);
 }
 
+void sampleImageByHoG(const VI &img, const int ooiX, const int ooiY, VVD &features, VD &dv) {
+    VVD res(480, VD(640, 0));
+    int index = 0;
+    for (int j = 0; j < 480; j++) {
+        VD row(640, 0);
+        copy(img.begin() + index, img.begin() + index + 640, row.begin());
+        index += 640;
+        // add row
+        res[j] = row;
+    }
+    
+    // calculate HOG
+    VD descriptor;
+    hogoperator.wx = HOG_WX;
+    hogoperator.wy = HOG_WY;
+    hogoperator.nbin = HOG_BIN;
+    hogoperator.HOGdescriptor(res, descriptor);
+    
+    
+    bool hasOOI = (ooiX > 0 && ooiY > 0);
+    if (hasOOI) {
+        double xv = round(100.0 * ooiX / 640.0);
+        double yv = ooiY / 480.0;
+        double v = (xv + yv) / 100.0;
+        dv.push_back(v);
+    } else {
+        // not found
+        dv.push_back(-1.0);
+    }
+    features.push_back(descriptor);
+    
+    //    Printf("Sampled %i regions\n", sCount);
+}
+
 pair<int, int>extractCoordinates(const double value) {
     int x = -1, y = -1;
     if (value > 0) {
@@ -1977,31 +1944,22 @@ pair<int, int>extractCoordinates(const double value) {
 
 pair<int, int>findMaximum(const VD &values) {
     int x = -1, y = -1, index = 0;
-    int roiIndex = -1;
-    double maxLabel = 0;
+    double v = 0;
     for (int ys = 0; ys < YSAMPLES; ys++) {
         for (int xs = 0; xs < XSAMPLES; xs++) {
-            if (values[index] > maxLabel) {
-                maxLabel = values[index];
-                roiIndex = index;
+            if (values[index] > v) {
+                v = values[index];
+                v *= 100.0;
+                x = 640 * floor(v) / 100.0;
+                y = 480 * (v - floor(v));
             }
             // increment
             index++;
         }
     }
-    if (roiIndex >= 0 && maxLabel > 0) {
-        y = SAMPLE_SIZE_VER * floor(roiIndex / XSAMPLES);
-        x = SAMPLE_SIZE_HOR * (roiIndex % XSAMPLES);
-        
-        y += SAMPLE_SIZE_VER / 2;
-        x += SAMPLE_SIZE_HOR / 2;
-        
-        Printf("ROI at [%i, %i], index: %i, label: %.4f\n", x, y, roiIndex, maxLabel);
-    }
     return pair<int, int>(x, y);
 }
 
-void save_problem(const char *filename, const struct svm_problem *problem);
 //
 // ----------------------------
 //
@@ -2017,26 +1975,17 @@ class RobotVisionTrackerX {
     
     int ooiCount = 0;
     int noOoiCount = 0;
+    
 public:
-    RobotVisionTrackerX() {
-        // just to be sure
-        Assert(640 % SAMPLE_SIZE_HOR == 0, "Wrong horizontal sample");
-        Assert(480 % SAMPLE_SIZE_VER == 0, "Wrong vertical sample");
-    }
-    
-    
     int training(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight, const int leftX, const int leftY, const int rightX, const int rightY) {
-        
-        Printf("Train: %i : %i, left[%i, %i], right[%i, %i]\n", videoIndex, frameIndex, leftX, leftY, rightX, rightY);
-        
-        // collect test data
-        extractLabeledSamples(imageDataLeft, leftX, leftY, trainLeftFeatures, trainLeftDV);
-        extractLabeledSamples(imageDataRight, rightX, rightY, trainRightFeatures, trainRightDV);
+        Printf("X-Contest +Adding training data: %i : %i, left[%i, %i], right[%i, %i]\n", videoIndex, frameIndex, leftX, leftY, rightX, rightY);
         
         // collect test data
-        //        extractSamples(imageDataLeft, leftX, leftY, trainLeftFeatures, trainLeftDV);
-        //        extractSamples(imageDataRight, rightX, rightY, trainRightFeatures, trainRightDV);
+//        sampleRegions(imageDataLeft, leftX, leftY, trainLeftFeatures, trainLeftDV);
+//        sampleRegions(imageDataRight, rightX, rightY, trainRightFeatures, trainRightDV);
         
+        sampleImageByHoG(imageDataLeft, leftX, leftY, trainLeftFeatures, trainLeftDV);
+        sampleImageByHoG(imageDataRight, rightX, rightY, trainRightFeatures, trainRightDV);
         
         if (leftX < 0 || leftY < 0) {
             noOoiCount++;
@@ -2044,33 +1993,27 @@ public:
             ooiCount++;
         }
         
-        //        if (videoIndex == 0 && frameIndex == 5) {
-        //            return 1;
-        //        }
-        
         return 0;
     }
     
     VI testing(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight) {
-        Printf("Test: %i : %i\n", videoIndex, frameIndex);
-        
         // do left
-        //
         VVD testFeatures;
         VD testDV;
-        extractLabeledSamples(imageDataLeft, -1, -1, testFeatures, testDV);
+//        sampleRegions(imageDataLeft, -1, -1, testFeatures, testDV);
+        sampleImageByHoG(imageDataLeft, -1, -1, testFeatures, testDV);
         
         VD res = rfLeft.predict(testFeatures, conf);
-        pair<int, int> left = findMaximum(res);
+        pair<int, int> left = extractCoordinates(res[0]);
         
         // do right
-        //
         testFeatures.clear();
         testDV.clear();
-        extractLabeledSamples(imageDataRight, -1, -1, testFeatures, testDV);
+//        sampleRegions(imageDataRight, -1, -1, testFeatures, testDV);
+        sampleImageByHoG(imageDataRight, -1, -1, testFeatures, testDV);
         
         res = rfRight.predict(testFeatures, conf);
-        pair<int, int> right = findMaximum(res);
+        pair<int, int> right = extractCoordinates(res[0]);
         
         VI result = {left.first, left.second, right.first, right.second};
         return result;
@@ -2079,23 +2022,20 @@ public:
     int doneTraining() {
         Printf("Frames with OOI: %i, without OOI: %i\n", ooiCount, noOoiCount);
         
-        conf.nTree = 50;//500;
-        conf.mtry = 40;//400;
-        conf.nodesize = 50;//500;
+        conf.nTree = 500;
+        conf.mtry = 80;
         
         // do train
         rfLeft.train(trainLeftFeatures, trainLeftDV, conf);
         rfRight.train(trainRightFeatures, trainRightDV, conf);
         
-        // release memory
-        trainLeftFeatures.clear();
-        trainLeftDV.clear();
-        trainRightFeatures.clear();
-        trainRightDV.clear();
-        
+        // release memory - waste of time - skipping
+        //        trainLeftFeatures.clear();
+        //        trainLeftDV.clear();
+        //        trainRightFeatures.clear();
+        //        trainRightDV.clear();
         return 0;
     }
 };
-
 
 #endif

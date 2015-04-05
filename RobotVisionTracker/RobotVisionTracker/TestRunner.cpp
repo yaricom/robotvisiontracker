@@ -10,7 +10,13 @@
 #include <ctime>
 #include "lodepng/lodepng.h"
 
+//#define X_CONTEST
+
+#ifdef X_CONTEST
+#include "RobotVisionTrackerX.h"
+#else
 #include "RobotVisionTracker.h"
+#endif
 
 inline int SPrintf(char *buf, size_t size, const char *fmt, ...) {
     va_list args;
@@ -134,12 +140,19 @@ class RobotVisionTrackerVis {
     VS trainingVideos;
     VS testingVideos;
     
+#ifdef X_CONTEST
+    RobotVisionTrackerX *task;
+#else
     RobotVisionTracker *task;
+#endif
     
 public:
     string folder;
-    
+#ifdef X_CONTEST
+    RobotVisionTrackerVis (RobotVisionTrackerX *task) :task(task) {
+#else
     RobotVisionTrackerVis (RobotVisionTracker *task) :task(task) {
+#endif
         for (int i = 1; i < 16; i++) {
             trainingVideos.push_back("Closeup-Car" + to_string(i));
         }
@@ -327,7 +340,11 @@ int main(int argc, const char * argv[]) {
         printf("Usage: folder\n");
         return 0;
     }
+#ifdef X_CONTEST
+    RobotVisionTrackerX task;
+#else
     RobotVisionTracker task;
+#endif
     RobotVisionTrackerVis runner(&task);
     runner.folder = argv[1];
     
