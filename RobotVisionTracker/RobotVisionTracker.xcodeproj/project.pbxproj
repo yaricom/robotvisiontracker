@@ -31,6 +31,7 @@
 		7849A9221AC9D04F00F68AD3 /* lodepng.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = lodepng.h; path = lodepng/lodepng.h; sourceTree = "<group>"; };
 		7849A9231AC9D0B300F68AD3 /* lodepng.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lodepng.cpp; path = lodepng/lodepng.cpp; sourceTree = "<group>"; };
 		7849A9251AC9D0F800F68AD3 /* TestRunner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestRunner.cpp; sourceTree = "<group>"; };
+		786CFB341AD0793D00B2900F /* RobotVisionTrackerX.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RobotVisionTrackerX.h; sourceTree = "<group>"; };
 		78BB17B01ACEF0100057AB26 /* onlineSVM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = onlineSVM.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -68,6 +69,7 @@
 				7815CE1A1AC991B000BE0EA1 /* stdc++.h */,
 				7815CE181AC98E8800BE0EA1 /* AsteroidRejector.h */,
 				7815CE191AC9910300BE0EA1 /* RobotVisionTracker.h */,
+				786CFB341AD0793D00B2900F /* RobotVisionTrackerX.h */,
 				7849A9251AC9D0F800F68AD3 /* TestRunner.cpp */,
 				78BB17B01ACEF0100057AB26 /* onlineSVM.h */,
 			);

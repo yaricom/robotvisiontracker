@@ -5088,7 +5088,6 @@ void readProblem(const VVD &samples, const VD &dv, struct svm_problem *prob, str
     prob->x = Malloc(struct svm_node *, prob->l);
     x_space = Malloc(struct svm_node, elements);
     
-#warning check again if only non-zero must be added
     // fill with values
     int j = 0;
     for (int i = 0; i < prob->l; i++) {
@@ -5333,7 +5332,7 @@ class RobotVisionTracker {
     
     int ooiCount = 0;
     int noOoiCount = 0;
-
+/*
     svm_model *modelLeft = NULL;
     svm_model *modelRight = NULL;
     
@@ -5341,13 +5340,13 @@ class RobotVisionTracker {
     
     svm_problem prob;
     svm_node *x_space = NULL;
-    
+*/
 public:
     RobotVisionTracker() {
         // just to be sure
         Assert(640 % SAMPLE_SIZE_HOR == 0, "Wrong horizontal sample");
         Assert(480 % SAMPLE_SIZE_VER == 0, "Wrong vertical sample");
-        
+/*
         // init parameters
         param.svm_type = ONE_CLASS;//C_SVC;//
         param.kernel_type = RBF;
@@ -5363,9 +5362,9 @@ public:
         param.probability = 0;//1;
         param.nr_weight = 0;
         param.weight_label = NULL;
-        param.weight = NULL;
+        param.weight = NULL;*/
     }
-    
+/*
     int training(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight, const int leftX, const int leftY, const int rightX, const int rightY) {
         
         Printf("Train: %i : %i, left[%i, %i], right[%i, %i]\n", videoIndex, frameIndex, leftX, leftY, rightX, rightY);
@@ -5488,14 +5487,14 @@ public:
 #endif
 
         // load models
-/*        
-        modelLeft = svm_load_model("/Users/yaric/left_model.svmmodel");
-        modelRight = svm_load_model("/Users/yaric/right_model.svmmodel");
-*/
+ 
+        // modelLeft = svm_load_model("/Users/yaric/left_model.svmmodel");
+        // modelRight = svm_load_model("/Users/yaric/right_model.svmmodel");
+ 
         return 0;
-    }
+    }*/
     
-    /*
+    
     int training(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight, const int leftX, const int leftY, const int rightX, const int rightY) {
         
         Printf("Train: %i : %i, left[%i, %i], right[%i, %i]\n", videoIndex, frameIndex, leftX, leftY, rightX, rightY);
@@ -5550,7 +5549,7 @@ public:
     int doneTraining() {
         Printf("Frames with OOI: %i, without OOI: %i\n", ooiCount, noOoiCount);
         
-        conf.nTree = 200;//500;
+        conf.nTree = 50;//500;
         conf.mtry = 40;//400;
         conf.nodesize = 50;//500;
         
@@ -5565,7 +5564,7 @@ public:
         trainRightDV.clear();
         
         return 0;
-    }*/
+    }
 };
 
 void save_problem(const char *save_filename, const struct svm_problem *prob) {
