@@ -5116,8 +5116,8 @@ void readProblem(const VVD &samples, const VD &dv, struct svm_problem *prob, str
 //---------------------------------------------------------------------------------------------
 //
 //=============================================================================================
-const static int SAMPLE_SIZE_HOR = 64;//2;//8;//16;//32;
-const static int SAMPLE_SIZE_VER = 60;
+const static int SAMPLE_SIZE_HOR = 32;//2;//8;//16;//32;
+const static int SAMPLE_SIZE_VER = 48;
 const static int SAMPLE_SIZE_MULT = SAMPLE_SIZE_HOR * SAMPLE_SIZE_VER;
 const static int XSAMPLES = 640 / SAMPLE_SIZE_HOR;
 const static int YSAMPLES = 480 / SAMPLE_SIZE_VER;
@@ -5151,6 +5151,133 @@ void extractSampleHOG(const VI &img, const int x, const int y, VD &descriptor) {
     hogoperator.nbin = HOG_BIN;
     hogoperator.HOGdescriptor(res, descriptor);
 }
+
+
+void extractLabeledROISamples(const VI &img, const int ooiX, const int ooiY, VVD &features, VD &dv) {
+    bool hasOOI = (ooiX > 0 && ooiY > 0);
+    int sCount = 0, positives = 0;
+    if (hasOOI) {
+        // sample region of interest
+        int startX = ooiX - SAMPLE_SIZE_HOR / 2;
+        if (startX < 0) {
+            startX += abs(startX);
+        } else if(startX + SAMPLE_SIZE_HOR >= 640) {
+            startX = 640 - SAMPLE_SIZE_HOR;
+        }
+        int startY = ooiY - SAMPLE_SIZE_VER / 2;
+        if (startY < 0) {
+            startY += abs(startY);
+        } else if (startY + SAMPLE_SIZE_VER >= 480) {
+            startY = 480 - SAMPLE_SIZE_VER;
+        }
+        VD sample;
+        extractSampleHOG(img, startX, startY, sample);
+        features.push_back(sample);
+        dv.push_back(1.0);
+        sCount++;
+        positives++;
+    } else {
+        // false positives
+        for (int ys = 0; ys < YSAMPLES; ys++) {
+            for (int xs = 0; xs < XSAMPLES; xs++) {
+                VD sample;
+                extractSampleHOG(img, xs * SAMPLE_SIZE_HOR, ys * SAMPLE_SIZE_VER, sample);
+                
+                //            VD sample = extractSample(img, xs * SAMPLE_SIZE_HOR, ys * SAMPLE_SIZE_VER);
+                features.push_back(sample);
+                // not found
+                dv.push_back(-1.0);
+                sCount++;
+            }
+        }
+    }
+    Printf("Extracted %i samples with %i posititves\n", sCount, positives);
+}
+
+void extractROISamples(const VI &img, const int dx, const int dy, VVD &features) {
+    int xcount = 640 / dx;
+    int ycount = 480 / dy;
+    VVD res(ycount, VD(xcount, 0));
+    int sCount = 0;
+    for (int ys = 0; ys < ycount; ys++) {
+        int starty = ys * dy;
+        if (starty + SAMPLE_SIZE_VER > 480) {
+            starty = 480 - SAMPLE_SIZE_VER;
+        }
+        
+        for (int xs = 0; xs < xcount; xs++) {
+            VD sample;
+            int startx = xs * dx;
+            if (startx + SAMPLE_SIZE_HOR > 640) {
+                startx = 640 - SAMPLE_SIZE_HOR;
+            }
+            extractSampleHOG(img, startx, starty, sample);
+            features.push_back(sample);
+            
+            sCount++;
+            
+            if (startx + SAMPLE_SIZE_HOR == 640) {
+                // outside
+                break;
+            }
+        }
+        
+        if (starty + SAMPLE_SIZE_VER == 480) {
+            // outside
+            break;
+        }
+    }
+    
+    Printf("Sampled: %i regions from: %i\n", sCount, xcount * ycount);
+}
+
+pair<int, int>findMaximum(const VD &values, const int dx, const int dy) {
+    int xcount = 640 / dx;
+    int ycount = 480 / dy;
+    int x = -1, y = -1, index = 0;
+    int roiIndex = -1;
+    double maxLabel = 0;
+    for (int ys = 0; ys < ycount; ys++) {
+        int starty = ys * dy;
+        if (starty + SAMPLE_SIZE_VER > 480) {
+            starty = 480 - SAMPLE_SIZE_VER;
+        }
+        
+        for (int xs = 0; xs < xcount; xs++) {
+            VD sample;
+            int startx = xs * dx;
+            if (startx + SAMPLE_SIZE_HOR > 640) {
+                startx = 640 - SAMPLE_SIZE_HOR;
+            }
+            if (values[index] > maxLabel) {
+                maxLabel = values[index];
+                roiIndex = index;
+                
+                x = startx + SAMPLE_SIZE_HOR / 2;
+                y = starty + SAMPLE_SIZE_VER / 2;
+            }
+            // increment
+            index++;
+            
+            if (startx + SAMPLE_SIZE_HOR == 640) {
+                // outside
+                break;
+            }
+        }
+        
+        if (starty + SAMPLE_SIZE_VER == 480) {
+            // outside
+            break;
+        }
+    }
+    if (roiIndex >= 0 && maxLabel > 0) {
+        Printf("ROI at [%i, %i], index: %i, label: %.4f\n", x, y, roiIndex, maxLabel);
+    } else {
+        Printf("ROI not found---------------\n");
+    }
+    return pair<int, int>(x, y);
+}
+
 
 pair<int, int>detectRoi(const struct svm_model *model, const struct svm_problem *prob) {
     Printf("Start ROI with model: [classes: %i]\n", model->nr_class);
@@ -5403,6 +5530,76 @@ public:
     
     int training(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight, const int leftX, const int leftY, const int rightX, const int rightY) {
         
+        Printf("+Adding training data: %i : %i, left[%i, %i], right[%i, %i]\n", videoIndex, frameIndex, leftX, leftY, rightX, rightY);
+        
+        // collect test data
+        extractLabeledROISamples(imageDataLeft, leftX, leftY, trainLeftFeatures, trainLeftDV);
+        extractLabeledROISamples(imageDataRight, rightX, rightY, trainRightFeatures, trainRightDV);
+        
+        
+        
+        if (leftX < 0 || leftY < 0) {
+            noOoiCount++;
+        } else {
+            ooiCount++;
+        }
+        
+        if (videoIndex == 1 /*&& frameIndex == 5*/) {
+            return 1;
+        }
+        
+        return 0;
+    }
+    
+    VI testing(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight) {
+        Printf("Test: %i : %i\n", videoIndex, frameIndex);
+        
+        // do left
+        //
+        VVD testFeatures;
+        VD testDV;
+        extractLabeledSamples(imageDataLeft, -1, -1, testFeatures, testDV);
+//        extractROISamples(imageDataLeft, SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4, testFeatures);
+        
+        VD res = rfLeft.predict(testFeatures, conf);
+        pair<int, int> left = findMaximum(res);//, SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4);
+        
+        // do right
+        //
+        testFeatures.clear();
+        testDV.clear();
+        extractLabeledSamples(imageDataRight, -1, -1, testFeatures, testDV);
+//        extractROISamples(imageDataRight, SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4, testFeatures);
+        
+        res = rfRight.predict(testFeatures, conf);
+        pair<int, int> right = findMaximum(res);//, SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4);
+        
+        VI result = {left.first, left.second, right.first, right.second};
+        return result;
+    }
+    
+    int doneTraining() {
+        Printf("Frames with OOI: %i, without OOI: %i\n", ooiCount, noOoiCount);
+        
+        conf.nTree = 100;//500;
+        conf.mtry = 60;
+        //        conf.nodesize = 500;
+        
+        // do train
+        rfLeft.train(trainLeftFeatures, trainLeftDV, conf);
+        rfRight.train(trainRightFeatures, trainRightDV, conf);
+        
+        // release memory - waste of time - skipping
+        //        trainLeftFeatures.clear();
+        //        trainLeftDV.clear();
+        //        trainRightFeatures.clear();
+        //        trainRightDV.clear();
+        
+        return 0;
+    }
+    /*
+    int training(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight, const int leftX, const int leftY, const int rightX, const int rightY) {
+        
         Printf("Train: %i : %i, left[%i, %i], right[%i, %i]\n", videoIndex, frameIndex, leftX, leftY, rightX, rightY);
         
         // collect test data
@@ -5525,12 +5722,12 @@ public:
 #endif
         
         // load models
-        /*
-         modelLeft = svm_load_model("/Users/yaric/left_model.svmmodel");
-         modelRight = svm_load_model("/Users/yaric/right_model.svmmodel");
-         */
+     
+//         modelLeft = svm_load_model("/Users/yaric/left_model.svmmodel");
+//         modelRight = svm_load_model("/Users/yaric/right_model.svmmodel");
+     
         return 0;
-    }
+    }*/
 
     /*
     int training(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight, const int leftX, const int leftY, const int rightX, const int rightY) {

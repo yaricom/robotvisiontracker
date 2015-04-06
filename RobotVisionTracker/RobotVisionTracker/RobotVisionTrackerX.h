@@ -1823,8 +1823,8 @@ private:
     }
 };
 
-const static int SAMPLE_SIZE_HOR = 2;//2;//8;//16;//32;
-const static int SAMPLE_SIZE_VER = 2;
+const static int SAMPLE_SIZE_HOR = 32;//2;//8;//16;//32;
+const static int SAMPLE_SIZE_VER = 48;
 const static int SAMPLE_SIZE_MULT = SAMPLE_SIZE_HOR * SAMPLE_SIZE_VER;
 const static int XSAMPLES = 640 / SAMPLE_SIZE_HOR;
 const static int YSAMPLES = 480 / SAMPLE_SIZE_VER;
@@ -1859,7 +1859,66 @@ void extractSampleHOG(const VI &img, const int x, const int y, VD &descriptor) {
     hogoperator.HOGdescriptor(res, descriptor);
 }
 
+void extractLabeledROISamples(const VI &img, const int ooiX, const int ooiY, VVD &features, VD &dv) {
+    bool hasOOI = (ooiX > 0 && ooiY > 0);
+    int sCount = 0, positives = 0;
+    if (hasOOI) {
+        // sample region of interest
+        int startX = ooiX - SAMPLE_SIZE_HOR / 2;
+        if (startX < 0) {
+            startX += abs(startX);
+        } else if(startX + SAMPLE_SIZE_HOR >= 640) {
+            startX = 640 - SAMPLE_SIZE_HOR;
+        }
+        int startY = ooiY - SAMPLE_SIZE_VER / 2;
+        if (startY < 0) {
+            startY += abs(startY);
+        } else if (startY + SAMPLE_SIZE_VER >= 480) {
+            startY = 480 - SAMPLE_SIZE_VER;
+        }
+        VD sample;
+        extractSampleHOG(img, startX, startY, sample);
+        features.push_back(sample);
+        dv.push_back(1.0);
+        sCount++;
+        positives++;
+    } else {
+        // false positives
+        for (int ys = 0; ys < YSAMPLES; ys++) {
+            for (int xs = 0; xs < XSAMPLES; xs++) {
+                VD sample;
+                extractSampleHOG(img, xs * SAMPLE_SIZE_HOR, ys * SAMPLE_SIZE_VER, sample);
+                features.push_back(sample);
+                // not found
+                dv.push_back(-1.0);
+                sCount++;
+            }
+        }
+    }
+    Printf("Extracted %i samples with %i posititves\n", sCount, positives);
+}
 
+void extractLabeledSamples(const VI &img, const int ooiX, const int ooiY, VVD &features, VD &dv) {
+    bool hasOOI = (ooiX > 0 && ooiY > 0);
+    int sCount = 0, positives = 0;
+    for (int ys = 0; ys < YSAMPLES; ys++) {
+        for (int xs = 0; xs < XSAMPLES; xs++) {
+            VD sample;
+            extractSampleHOG(img, xs * SAMPLE_SIZE_HOR, ys * SAMPLE_SIZE_VER, sample);
+            features.push_back(sample);
+            sCount++;
+            if (hasOOI && (ooiX >= xs * SAMPLE_SIZE_HOR && ooiX < xs * SAMPLE_SIZE_HOR + SAMPLE_SIZE_HOR
+                           && ooiY >= ys * SAMPLE_SIZE_VER && ooiY < ys * SAMPLE_SIZE_VER + SAMPLE_SIZE_VER)) {
+                dv.push_back(1.0);
+                positives++;
+            } else {
+                // not found
+                dv.push_back(-1.0);
+            }
+        }
+    }
+    Printf("Extracted %i samples with %i posititves\n", sCount, positives);
+}
 
 double sampleRegion(const VI &img, const int x, const int y) {
     double res = 0;
@@ -1978,14 +2037,14 @@ class RobotVisionTrackerX {
     
 public:
     int training(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight, const int leftX, const int leftY, const int rightX, const int rightY) {
-        Printf("X-Contest +Adding training data: %i : %i, left[%i, %i], right[%i, %i]\n", videoIndex, frameIndex, leftX, leftY, rightX, rightY);
+        
+        Printf("+Adding training data: %i : %i, left[%i, %i], right[%i, %i]\n", videoIndex, frameIndex, leftX, leftY, rightX, rightY);
         
         // collect test data
-//        sampleRegions(imageDataLeft, leftX, leftY, trainLeftFeatures, trainLeftDV);
-//        sampleRegions(imageDataRight, rightX, rightY, trainRightFeatures, trainRightDV);
+        extractLabeledROISamples(imageDataLeft, leftX, leftY, trainLeftFeatures, trainLeftDV);
+        extractLabeledROISamples(imageDataRight, rightX, rightY, trainRightFeatures, trainRightDV);
         
-        sampleImageByHoG(imageDataLeft, leftX, leftY, trainLeftFeatures, trainLeftDV);
-        sampleImageByHoG(imageDataRight, rightX, rightY, trainRightFeatures, trainRightDV);
+        
         
         if (leftX < 0 || leftY < 0) {
             noOoiCount++;
@@ -1993,27 +2052,33 @@ public:
             ooiCount++;
         }
         
+        //        if (videoIndex == 0 && frameIndex == 5) {
+        //            return 1;
+        //        }
+        
         return 0;
     }
     
     VI testing(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight) {
+        Printf("Test: %i : %i\n", videoIndex, frameIndex);
+        
         // do left
+        //
         VVD testFeatures;
         VD testDV;
-//        sampleRegions(imageDataLeft, -1, -1, testFeatures, testDV);
-        sampleImageByHoG(imageDataLeft, -1, -1, testFeatures, testDV);
+        extractLabeledSamples(imageDataLeft, -1, -1, testFeatures, testDV);
         
         VD res = rfLeft.predict(testFeatures, conf);
-        pair<int, int> left = extractCoordinates(res[0]);
+        pair<int, int> left = findMaximum(res);
         
         // do right
+        //
         testFeatures.clear();
         testDV.clear();
-//        sampleRegions(imageDataRight, -1, -1, testFeatures, testDV);
-        sampleImageByHoG(imageDataRight, -1, -1, testFeatures, testDV);
+        extractLabeledSamples(imageDataRight, -1, -1, testFeatures, testDV);
         
         res = rfRight.predict(testFeatures, conf);
-        pair<int, int> right = extractCoordinates(res[0]);
+        pair<int, int> right = findMaximum(res);
         
         VI result = {left.first, left.second, right.first, right.second};
         return result;
@@ -2022,8 +2087,9 @@ public:
     int doneTraining() {
         Printf("Frames with OOI: %i, without OOI: %i\n", ooiCount, noOoiCount);
         
-        conf.nTree = 500;
-        conf.mtry = 80;
+        conf.nTree = 500;//50;//500;
+        conf.mtry = 60;
+        //        conf.nodesize = 500;
         
         // do train
         rfLeft.train(trainLeftFeatures, trainLeftDV, conf);
@@ -2034,6 +2100,7 @@ public:
         //        trainLeftDV.clear();
         //        trainRightFeatures.clear();
         //        trainRightDV.clear();
+        
         return 0;
     }
 };
