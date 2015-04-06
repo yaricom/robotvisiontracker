@@ -5117,7 +5117,7 @@ void readProblem(const VVD &samples, const VD &dv, struct svm_problem *prob, str
 //
 //=============================================================================================
 const static int SAMPLE_SIZE_HOR = 32;//2;//8;//16;//32;
-const static int SAMPLE_SIZE_VER = 48;
+const static int SAMPLE_SIZE_VER = 24;//48;
 const static int SAMPLE_SIZE_MULT = SAMPLE_SIZE_HOR * SAMPLE_SIZE_VER;
 const static int XSAMPLES = 640 / SAMPLE_SIZE_HOR;
 const static int YSAMPLES = 480 / SAMPLE_SIZE_VER;
@@ -5511,7 +5511,7 @@ public:
         Assert(480 % SAMPLE_SIZE_VER == 0, "Wrong vertical sample");
         
         // init parameters
-        param.svm_type = EPSILON_SVR;//C_SVC;//
+        param.svm_type = C_SVC;//
         param.kernel_type = RBF;
         param.degree = 3;
         param.gamma = 0;	// 1/num_features
@@ -5558,21 +5558,21 @@ public:
         //
         VVD testFeatures;
         VD testDV;
-        extractLabeledSamples(imageDataLeft, -1, -1, testFeatures, testDV);
-//        extractROISamples(imageDataLeft, SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4, testFeatures);
+//        extractLabeledSamples(imageDataLeft, -1, -1, testFeatures, testDV);
+        extractROISamples(imageDataLeft, SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4, testFeatures);
         
         VD res = rfLeft.predict(testFeatures, conf);
-        pair<int, int> left = findMaximum(res);//, SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4);
+        pair<int, int> left = findMaximum(res, SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4);
         
         // do right
         //
         testFeatures.clear();
         testDV.clear();
-        extractLabeledSamples(imageDataRight, -1, -1, testFeatures, testDV);
-//        extractROISamples(imageDataRight, SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4, testFeatures);
+//        extractLabeledSamples(imageDataRight, -1, -1, testFeatures, testDV);
+        extractROISamples(imageDataRight, SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4, testFeatures);
         
         res = rfRight.predict(testFeatures, conf);
-        pair<int, int> right = findMaximum(res);//, SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4);
+        pair<int, int> right = findMaximum(res, SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4);
         
         VI result = {left.first, left.second, right.first, right.second};
         return result;
@@ -5581,7 +5581,7 @@ public:
     int doneTraining() {
         Printf("Frames with OOI: %i, without OOI: %i\n", ooiCount, noOoiCount);
         
-        conf.nTree = 100;//500;
+        conf.nTree = 300;//500;
         conf.mtry = 60;
         //        conf.nodesize = 500;
         
@@ -5603,8 +5603,8 @@ public:
         Printf("Train: %i : %i, left[%i, %i], right[%i, %i]\n", videoIndex, frameIndex, leftX, leftY, rightX, rightY);
         
         // collect test data
-        sampleImageByHoG(imageDataLeft, leftX, leftY, trainLeftFeatures, trainLeftDV);
-        sampleImageByHoG(imageDataRight, rightX, rightY, trainRightFeatures, trainRightDV);
+        extractLabeledROISamples(imageDataLeft, leftX, leftY, trainLeftFeatures, trainLeftDV);
+        extractLabeledROISamples(imageDataRight, rightX, rightY, trainRightFeatures, trainRightDV);
         
         
         
@@ -5628,11 +5628,10 @@ public:
         //
         VVD testFeaturesLeft;
         VD testDV;
-        sampleImageByHoG(imageDataLeft, -1, -1, testFeaturesLeft, testDV);
+        extractLabeledSamples(imageDataLeft, -1, -1, testFeaturesLeft, testDV);
         
         readProblem(testFeaturesLeft, testDV, &prob, x_space);
-        double leftVal = svm_predict(modelLeft, prob.x[0]);
-        pair<int, int>left = extractCoordinates(leftVal);
+        pair<int, int>left = detectRoi(modelLeft, &prob);
         free(prob.y);
         free(prob.x);
         free(x_space);
@@ -5641,11 +5640,10 @@ public:
         //
         testDV.clear();
         VVD testFeaturesRight;
-        sampleImageByHoG(imageDataRight, -1, -1, testFeaturesRight, testDV);
+        extractLabeledSamples(imageDataRight, -1, -1, testFeaturesRight, testDV);
         
         readProblem(testFeaturesRight, testDV, &prob, x_space);
-        double rightVal = svm_predict(modelLeft, prob.x[0]);
-        pair<int, int>right = extractCoordinates(rightVal);
+        pair<int, int>right = detectRoi(modelRight, &prob);
         free(prob.y);
         free(prob.x);
         free(x_space);
@@ -5728,87 +5726,6 @@ public:
      
         return 0;
     }*/
-
-    /*
-    int training(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight, const int leftX, const int leftY, const int rightX, const int rightY) {
-        
-//        if (frameIndex % 2 == 0 && leftX > 0 && rightY > 0) {
-//            // skip every second frame
-//            Printf("-Skipping training data: %i : %i, left[%i, %i], right[%i, %i]\n", videoIndex, frameIndex, leftX, leftY, rightX, rightY);
-//            return 0;
-//        }
-        
-        Printf("+Adding training data: %i : %i, left[%i, %i], right[%i, %i]\n", videoIndex, frameIndex, leftX, leftY, rightX, rightY);
-        
-        // collect test data
-//        extractLabeledSamples(imageDataLeft, leftX, leftY, trainLeftFeatures, trainLeftDV);
-//        extractLabeledSamples(imageDataRight, rightX, rightY, trainRightFeatures, trainRightDV);
-        
-        // collect test data
-        sampleImageByHoG(imageDataLeft, leftX, leftY, trainLeftFeatures, trainLeftDV);
-        sampleImageByHoG(imageDataRight, rightX, rightY, trainRightFeatures, trainRightDV);
-        
-        
-        if (leftX < 0 || leftY < 0) {
-            noOoiCount++;
-        } else {
-            ooiCount++;
-        }
-        
-//        if (videoIndex == 0 && frameIndex == 5) {
-//            return 1;
-//        }
-        
-        return 0;
-    }
-    
-    VI testing(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight) {
-        Printf("Test: %i : %i\n", videoIndex, frameIndex);
-        
-        // do left
-        //
-        VVD testFeatures;
-        VD testDV;
-//        extractLabeledSamples(imageDataLeft, -1, -1, testFeatures, testDV);
-        sampleImageByHoG(imageDataLeft, -1, -1, testFeatures, testDV);
-        
-        VD res = rfLeft.predict(testFeatures, conf);
-        pair<int, int> left = extractCoordinates(res[0]);//findMaximum(res);
-        
-        // do right
-        //
-        testFeatures.clear();
-        testDV.clear();
-//        extractLabeledSamples(imageDataRight, -1, -1, testFeatures, testDV);
-        sampleImageByHoG(imageDataRight, -1, -1, testFeatures, testDV);
-        
-        res = rfRight.predict(testFeatures, conf);
-        pair<int, int> right = extractCoordinates(res[0]);//indMaximum(res);
-        
-        VI result = {left.first, left.second, right.first, right.second};
-        return result;
-    }
-    
-    int doneTraining() {
-        Printf("Frames with OOI: %i, without OOI: %i\n", ooiCount, noOoiCount);
-        
-        conf.nTree = 500;//50;//500;
-        conf.mtry = 60;
-//        conf.nodesize = 500;
-        
-        // do train
-        rfLeft.train(trainLeftFeatures, trainLeftDV, conf);
-        rfRight.train(trainRightFeatures, trainRightDV, conf);
-        
-        // release memory - waste of time - skipping
-//        trainLeftFeatures.clear();
-//        trainLeftDV.clear();
-//        trainRightFeatures.clear();
-//        trainRightDV.clear();
-        
-        return 0;
-    }
-     */
 };
 
 void save_problem(const char *save_filename, const struct svm_problem *prob) {
