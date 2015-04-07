@@ -2147,8 +2147,8 @@ public:
     VI testing(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight) {
         Printf("Test: %i : %i\n", videoIndex, frameIndex);
         
-        int dx = SAMPLE_SIZE_HOR / 2;
-        int dy = SAMPLE_SIZE_VER / 2;
+        int dx = SAMPLE_SIZE_HOR / 3;//2;
+        int dy = SAMPLE_SIZE_VER / 3;//2;
         
         Printf("Sliding step dx: %i, dy: %i\n", dx, dy);
         
@@ -2180,7 +2180,7 @@ public:
         Printf("Frames with OOI: %i, without OOI: %i\n", ooiCount, noOoiCount);
         
         conf.nTree = 200;//50;//500;
-        conf.mtry = 40;
+        conf.mtry = 60;//40;
         //        conf.nodesize = 500;
         
         // do train

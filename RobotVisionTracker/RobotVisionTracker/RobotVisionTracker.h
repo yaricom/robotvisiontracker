@@ -5555,7 +5555,7 @@ public:
     VI testing(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight) {
         Printf("Test: %i : %i\n", videoIndex, frameIndex);
         
-        int dx = SAMPLE_SIZE_HOR / 4;
+        int dx = SAMPLE_SIZE_HOR / 3;//4;
         int dy = SAMPLE_SIZE_VER / 4;
         
         Printf("Sliding step dx: %i, dy: %i\n", dx, dy);
@@ -5573,7 +5573,6 @@ public:
         // do right
         //
         VVD testFeaturesRight;
-//        testDV.clear();
 //        extractLabeledSamples(imageDataRight, -1, -1, testFeatures, testDV);
         extractROISamples(imageDataRight, dx, dy, testFeaturesRight);
         
@@ -5587,8 +5586,8 @@ public:
     int doneTraining() {
         Printf("Frames with OOI: %i, without OOI: %i\n", ooiCount, noOoiCount);
         
-        conf.nTree = 200;//500;
-        conf.mtry = 60;
+        conf.nTree = 300;//200;
+        conf.mtry = 80;// 60;
         //        conf.nodesize = 500;
         
         // do train
