@@ -1833,7 +1833,7 @@ HoG hogoperator;
 
 const static int HOG_WX = 5;
 const static int HOG_WY = 5;
-const static int HOG_BIN = 10;
+const static int HOG_BIN = 8;
 
 void extractSampleHOG(const VI &img, const int x, const int y, VD &descriptor) {
     VVD res(SAMPLE_SIZE_VER, VD(SAMPLE_SIZE_HOR, 0));
@@ -2064,20 +2064,19 @@ public:
         
         // do left
         //
-        VVD testFeatures;
+        VVD testFeaturesLeft;
         VD testDV;
-        extractLabeledSamples(imageDataLeft, -1, -1, testFeatures, testDV);
+        extractLabeledSamples(imageDataLeft, -1, -1, testFeaturesLeft, testDV);
         
-        VD res = rfLeft.predict(testFeatures, conf);
+        VD res = rfLeft.predict(testFeaturesLeft, conf);
         pair<int, int> left = findMaximum(res);
         
         // do right
         //
-        testFeatures.clear();
-        testDV.clear();
-        extractLabeledSamples(imageDataRight, -1, -1, testFeatures, testDV);
+        VVD testFeaturesRight;
+        extractLabeledSamples(imageDataRight, -1, -1, testFeaturesRight, testDV);
         
-        res = rfRight.predict(testFeatures, conf);
+        res = rfRight.predict(testFeaturesRight, conf);
         pair<int, int> right = findMaximum(res);
         
         VI result = {left.first, left.second, right.first, right.second};
@@ -2087,8 +2086,8 @@ public:
     int doneTraining() {
         Printf("Frames with OOI: %i, without OOI: %i\n", ooiCount, noOoiCount);
         
-        conf.nTree = 500;//50;//500;
-        conf.mtry = 60;
+        conf.nTree = 200;//50;//500;
+        conf.mtry = 40;
         //        conf.nodesize = 500;
         
         // do train

@@ -5557,22 +5557,22 @@ public:
         
         // do left
         //
-        VVD testFeatures;
-        VD testDV;
-//        extractLabeledSamples(imageDataLeft, -1, -1, testFeatures, testDV);
-        extractROISamples(imageDataLeft, SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4, testFeatures);
+        VVD testFeaturesLeft;
+//        VD testDV;
+//        extractLabeledSamples(imageDataLeft, -1, -1, testFeaturesLeft, testDV);
+        extractROISamples(imageDataLeft, SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4, testFeaturesLeft);
         
-        VD res = rfLeft.predict(testFeatures, conf);
+        VD res = rfLeft.predict(testFeaturesLeft, conf);
         pair<int, int> left = findMaximumBySlidingWindow(res, SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4);
         
         // do right
         //
-        testFeatures.clear();
-        testDV.clear();
+        VVD testFeaturesRight;
+//        testDV.clear();
 //        extractLabeledSamples(imageDataRight, -1, -1, testFeatures, testDV);
-        extractROISamples(imageDataRight, SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4, testFeatures);
+        extractROISamples(imageDataRight, SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4, testFeaturesRight);
         
-        res = rfRight.predict(testFeatures, conf);
+        res = rfRight.predict(testFeaturesRight, conf);
         pair<int, int> right = findMaximumBySlidingWindow(res, SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4);
         
         VI result = {left.first, left.second, right.first, right.second};
@@ -5582,7 +5582,7 @@ public:
     int doneTraining() {
         Printf("Frames with OOI: %i, without OOI: %i\n", ooiCount, noOoiCount);
         
-        conf.nTree = 300;//500;
+        conf.nTree = 200;//500;
         conf.mtry = 60;
         //        conf.nodesize = 500;
         
