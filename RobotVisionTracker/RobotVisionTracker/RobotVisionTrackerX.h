@@ -1824,7 +1824,7 @@ private:
 };
 
 const static int SAMPLE_SIZE_HOR = 32;//2;//8;//16;//32;
-const static int SAMPLE_SIZE_VER = 48;
+const static int SAMPLE_SIZE_VER = 40;//48;
 const static int SAMPLE_SIZE_MULT = SAMPLE_SIZE_HOR * SAMPLE_SIZE_VER;
 const static int XSAMPLES = 640 / SAMPLE_SIZE_HOR;
 const static int YSAMPLES = 480 / SAMPLE_SIZE_VER;
@@ -2147,8 +2147,8 @@ public:
     VI testing(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight) {
         Printf("Test: %i : %i\n", videoIndex, frameIndex);
         
-        int dx = SAMPLE_SIZE_HOR / 3;//2;
-        int dy = SAMPLE_SIZE_VER / 3;//2;
+        int dx = SAMPLE_SIZE_HOR / 2;
+        int dy = SAMPLE_SIZE_VER / 2;
         
         Printf("Sliding step dx: %i, dy: %i\n", dx, dy);
         
@@ -2165,7 +2165,6 @@ public:
         // do right
         //
         VVD testFeaturesRight;
-        //        testDV.clear();
         //        extractLabeledSamples(imageDataRight, -1, -1, testFeatures, testDV);
         extractROISamples(imageDataRight, dx, dy, testFeaturesRight);
         
@@ -2180,7 +2179,7 @@ public:
         Printf("Frames with OOI: %i, without OOI: %i\n", ooiCount, noOoiCount);
         
         conf.nTree = 200;//50;//500;
-        conf.mtry = 60;//40;
+        conf.mtry = 40;
         //        conf.nodesize = 500;
         
         // do train
