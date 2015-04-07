@@ -2148,7 +2148,7 @@ public:
     VI testing(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight) {
         Printf("Test: %i : %i\n", videoIndex, frameIndex);
         
-        int dx = SAMPLE_SIZE_HOR / 2;
+        int dx = 10;//SAMPLE_SIZE_HOR / 2;
         int dy = 14;//SAMPLE_SIZE_VER / 2;
         
         Printf("Sliding step dx: %i, dy: %i\n", dx, dy);
