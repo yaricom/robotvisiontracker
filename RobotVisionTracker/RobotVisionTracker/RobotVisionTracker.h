@@ -5231,7 +5231,7 @@ void extractROISamples(const VI &img, const int dx, const int dy, VVD &features)
     Printf("Sampled: %i regions from: %i\n", sCount, xcount * ycount);
 }
 
-pair<int, int>findMaximum(const VD &values, const int dx, const int dy) {
+pair<int, int>findMaximumBySlidingWindow(const VD &values, const int dx, const int dy) {
     int xcount = 640 / dx;
     int ycount = 480 / dy;
     int x = -1, y = -1, index = 0;
@@ -5250,6 +5250,7 @@ pair<int, int>findMaximum(const VD &values, const int dx, const int dy) {
                 startx = 640 - SAMPLE_SIZE_HOR;
             }
             if (values[index] > maxLabel) {
+                // look for the best match
                 maxLabel = values[index];
                 roiIndex = index;
                 
@@ -5259,13 +5260,13 @@ pair<int, int>findMaximum(const VD &values, const int dx, const int dy) {
             // increment
             index++;
             
-            if (startx + SAMPLE_SIZE_HOR == 640) {
+            if (startx + SAMPLE_SIZE_HOR == 640 || index >= values.size()) {
                 // outside
                 break;
             }
         }
         
-        if (starty + SAMPLE_SIZE_VER == 480) {
+        if (starty + SAMPLE_SIZE_VER == 480 || index >= values.size()) {
             // outside
             break;
         }
@@ -5544,9 +5545,9 @@ public:
             ooiCount++;
         }
         
-        if (videoIndex == 1 /*&& frameIndex == 5*/) {
-            return 1;
-        }
+//        if (videoIndex == 1 /*&& frameIndex == 5*/) {
+//            return 1;
+//        }
         
         return 0;
     }
@@ -5562,7 +5563,7 @@ public:
         extractROISamples(imageDataLeft, SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4, testFeatures);
         
         VD res = rfLeft.predict(testFeatures, conf);
-        pair<int, int> left = findMaximum(res, SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4);
+        pair<int, int> left = findMaximumBySlidingWindow(res, SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4);
         
         // do right
         //
@@ -5572,7 +5573,7 @@ public:
         extractROISamples(imageDataRight, SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4, testFeatures);
         
         res = rfRight.predict(testFeatures, conf);
-        pair<int, int> right = findMaximum(res, SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4);
+        pair<int, int> right = findMaximumBySlidingWindow(res, SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4);
         
         VI result = {left.first, left.second, right.first, right.second};
         return result;
