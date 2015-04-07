@@ -10,7 +10,7 @@
 #include <ctime>
 #include "lodepng/lodepng.h"
 
-//#define X_CONTEST
+#define X_CONTEST
 
 #ifdef X_CONTEST
 #include "RobotVisionTrackerX.h"

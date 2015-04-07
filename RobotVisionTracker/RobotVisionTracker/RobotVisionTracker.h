@@ -5555,25 +5555,30 @@ public:
     VI testing(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight) {
         Printf("Test: %i : %i\n", videoIndex, frameIndex);
         
+        int dx = SAMPLE_SIZE_HOR / 4;
+        int dy = SAMPLE_SIZE_VER / 4;
+        
+        Printf("Sliding step dx: %i, dy: %i\n", dx, dy);
+        
         // do left
         //
         VVD testFeaturesLeft;
 //        VD testDV;
 //        extractLabeledSamples(imageDataLeft, -1, -1, testFeaturesLeft, testDV);
-        extractROISamples(imageDataLeft, SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4, testFeaturesLeft);
+        extractROISamples(imageDataLeft, dx, dy, testFeaturesLeft);
         
         VD res = rfLeft.predict(testFeaturesLeft, conf);
-        pair<int, int> left = findMaximumBySlidingWindow(res, SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4);
+        pair<int, int> left = findMaximumBySlidingWindow(res, dx, dy);
         
         // do right
         //
         VVD testFeaturesRight;
 //        testDV.clear();
 //        extractLabeledSamples(imageDataRight, -1, -1, testFeatures, testDV);
-        extractROISamples(imageDataRight, SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4, testFeaturesRight);
+        extractROISamples(imageDataRight, dx, dy, testFeaturesRight);
         
         res = rfRight.predict(testFeaturesRight, conf);
-        pair<int, int> right = findMaximumBySlidingWindow(res, SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4);
+        pair<int, int> right = findMaximumBySlidingWindow(res, dx, dy);
         
         VI result = {left.first, left.second, right.first, right.second};
         return result;
