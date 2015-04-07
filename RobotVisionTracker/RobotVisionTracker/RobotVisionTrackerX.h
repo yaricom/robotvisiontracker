@@ -820,8 +820,8 @@ public:
         } else {
             proxMat = (double*)calloc(n_size * n_size, sizeof(double));
         }
-        
-        double X_test[n_size * p_size];
+        // alloc on heap - may be too big
+        double* X_test = (double *) calloc(n_size * p_size, sizeof(double));
         for (int i = 0; i < n_size; i++) {
             for (int j = 0; j < p_size; j++){
                 if (ncat[j] == 1) {
@@ -856,6 +856,7 @@ public:
         free(ypred);
         free(nodex);
         free(proxMat);
+        free(X_test);
         
         return res;
     }
@@ -2148,7 +2149,7 @@ public:
         Printf("Test: %i : %i\n", videoIndex, frameIndex);
         
         int dx = SAMPLE_SIZE_HOR / 2;
-        int dy = SAMPLE_SIZE_VER / 2;
+        int dy = 14;//SAMPLE_SIZE_VER / 2;
         
         Printf("Sliding step dx: %i, dy: %i\n", dx, dy);
         
