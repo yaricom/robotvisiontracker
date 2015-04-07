@@ -31,6 +31,8 @@
 		7849A9221AC9D04F00F68AD3 /* lodepng.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = lodepng.h; path = lodepng/lodepng.h; sourceTree = "<group>"; };
 		7849A9231AC9D0B300F68AD3 /* lodepng.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lodepng.cpp; path = lodepng/lodepng.cpp; sourceTree = "<group>"; };
 		7849A9251AC9D0F800F68AD3 /* TestRunner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestRunner.cpp; sourceTree = "<group>"; };
+		7855F1FF1AD47FB20005CD92 /* LBP.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = LBP.c; sourceTree = "<group>"; };
+		7855F2001AD47FB20005CD92 /* LBP.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LBP.h; sourceTree = "<group>"; };
 		786CFB341AD0793D00B2900F /* RobotVisionTrackerX.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RobotVisionTrackerX.h; sourceTree = "<group>"; };
 		78BB17B01ACEF0100057AB26 /* onlineSVM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = onlineSVM.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -65,6 +67,7 @@
 		7815CE101AC98E5F00BE0EA1 /* RobotVisionTracker */ = {
 			isa = PBXGroup;
 			children = (
+				7855F1FE1AD47FB20005CD92 /* LBP */,
 				7849A9211AC9D03400F68AD3 /* lodepng */,
 				7815CE1A1AC991B000BE0EA1 /* stdc++.h */,
 				7815CE181AC98E8800BE0EA1 /* AsteroidRejector.h */,
@@ -83,6 +86,15 @@
 				7849A9231AC9D0B300F68AD3 /* lodepng.cpp */,
 			);
 			name = lodepng;
+			sourceTree = "<group>";
+		};
+		7855F1FE1AD47FB20005CD92 /* LBP */ = {
+			isa = PBXGroup;
+			children = (
+				7855F1FF1AD47FB20005CD92 /* LBP.c */,
+				7855F2001AD47FB20005CD92 /* LBP.h */,
+			);
+			path = LBP;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
