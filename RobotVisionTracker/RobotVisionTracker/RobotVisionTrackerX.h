@@ -1898,6 +1898,91 @@ void extractLabeledROISamples(const VI &img, const int ooiX, const int ooiY, VVD
     Printf("Extracted %i samples with %i posititves\n", sCount, positives);
 }
 
+void extractROISamples(const VI &img, const int dx, const int dy, VVD &features) {
+    int xcount = 640 / dx;
+    int ycount = 480 / dy;
+    VVD res(ycount, VD(xcount, 0));
+    int sCount = 0;
+    for (int ys = 0; ys < ycount; ys++) {
+        int starty = ys * dy;
+        if (starty + SAMPLE_SIZE_VER > 480) {
+            starty = 480 - SAMPLE_SIZE_VER;
+        }
+        
+        for (int xs = 0; xs < xcount; xs++) {
+            VD sample;
+            int startx = xs * dx;
+            if (startx + SAMPLE_SIZE_HOR > 640) {
+                startx = 640 - SAMPLE_SIZE_HOR;
+            }
+            extractSampleHOG(img, startx, starty, sample);
+            features.push_back(sample);
+            
+            sCount++;
+            
+            if (startx + SAMPLE_SIZE_HOR == 640) {
+                // outside
+                break;
+            }
+        }
+        
+        if (starty + SAMPLE_SIZE_VER == 480) {
+            // outside
+            break;
+        }
+    }
+    
+    Printf("Sampled: %i regions from: %i\n", sCount, xcount * ycount);
+}
+
+pair<int, int>findMaximumBySlidingWindow(const VD &values, const int dx, const int dy) {
+    int xcount = 640 / dx;
+    int ycount = 480 / dy;
+    int x = -1, y = -1, index = 0;
+    int roiIndex = -1;
+    double maxLabel = 0;
+    for (int ys = 0; ys < ycount; ys++) {
+        int starty = ys * dy;
+        if (starty + SAMPLE_SIZE_VER > 480) {
+            starty = 480 - SAMPLE_SIZE_VER;
+        }
+        
+        for (int xs = 0; xs < xcount; xs++) {
+            VD sample;
+            int startx = xs * dx;
+            if (startx + SAMPLE_SIZE_HOR > 640) {
+                startx = 640 - SAMPLE_SIZE_HOR;
+            }
+            if (values[index] > maxLabel) {
+                // look for the best match
+                maxLabel = values[index];
+                roiIndex = index;
+                
+                x = startx + SAMPLE_SIZE_HOR / 2;
+                y = starty + SAMPLE_SIZE_VER / 2;
+            }
+            // increment
+            index++;
+            
+            if (startx + SAMPLE_SIZE_HOR == 640 || index >= values.size()) {
+                // outside
+                break;
+            }
+        }
+        
+        if (starty + SAMPLE_SIZE_VER == 480 || index >= values.size()) {
+            // outside
+            break;
+        }
+    }
+    if (roiIndex >= 0 && maxLabel > 0) {
+        Printf("ROI at [%i, %i], index: %i, label: %.4f\n", x, y, roiIndex, maxLabel);
+    } else {
+        Printf("ROI not found---------------\n");
+    }
+    return pair<int, int>(x, y);
+}
+
 void extractLabeledSamples(const VI &img, const int ooiX, const int ooiY, VVD &features, VD &dv) {
     bool hasOOI = (ooiX > 0 && ooiY > 0);
     int sCount = 0, positives = 0;
@@ -2052,7 +2137,7 @@ public:
             ooiCount++;
         }
         
-        //        if (videoIndex == 0 && frameIndex == 5) {
+        //        if (videoIndex == 1 /*&& frameIndex == 5*/) {
         //            return 1;
         //        }
         
@@ -2062,22 +2147,30 @@ public:
     VI testing(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight) {
         Printf("Test: %i : %i\n", videoIndex, frameIndex);
         
+        int dx = SAMPLE_SIZE_HOR / 2;
+        int dy = SAMPLE_SIZE_VER / 2;
+        
+        Printf("Sliding step dx: %i, dy: %i\n", dx, dy);
+        
         // do left
         //
         VVD testFeaturesLeft;
-        VD testDV;
-        extractLabeledSamples(imageDataLeft, -1, -1, testFeaturesLeft, testDV);
+        //        VD testDV;
+        //        extractLabeledSamples(imageDataLeft, -1, -1, testFeaturesLeft, testDV);
+        extractROISamples(imageDataLeft, dx, dy, testFeaturesLeft);
         
         VD res = rfLeft.predict(testFeaturesLeft, conf);
-        pair<int, int> left = findMaximum(res);
+        pair<int, int> left = findMaximumBySlidingWindow(res, dx, dy);
         
         // do right
         //
         VVD testFeaturesRight;
-        extractLabeledSamples(imageDataRight, -1, -1, testFeaturesRight, testDV);
+        //        testDV.clear();
+        //        extractLabeledSamples(imageDataRight, -1, -1, testFeatures, testDV);
+        extractROISamples(imageDataRight, dx, dy, testFeaturesRight);
         
         res = rfRight.predict(testFeaturesRight, conf);
-        pair<int, int> right = findMaximum(res);
+        pair<int, int> right = findMaximumBySlidingWindow(res, dx, dy);
         
         VI result = {left.first, left.second, right.first, right.second};
         return result;
