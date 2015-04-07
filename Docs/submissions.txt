@@ -43,7 +43,7 @@ SAMPLE_SIZE_HOR / 3, SAMPLE_SIZE_VER / 3
 conf.nTree = 300;
 conf.mtry = 80;
 
-Test Complete: RobotVisionTracker example submission 32
+Test Complete: RobotVisionTracker example submission 32 (288967.0 Test Complete: RobotVisionTracker submission 17)
 =========================================================
 0) Score: 579348.063389751 Run Time: 2106403 ms Peak Memory Used: 851.789MB
 
@@ -136,3 +136,20 @@ const static int HOG_BIN = 10;
 SAMPLE_SIZE_HOR / 3, SAMPLE_SIZE_VER / 3
 conf.nTree = 200;
 conf.mtry = 60;
+
+
+Test Complete: RobotVisionTrackerX example submission 12
+=========================================================
+0) Score: 175533.71632561178 Run Time: 2439938 ms Peak Memory Used: 1413.613MB
+
+ Accuracy Score = 129000.00000000001 Processing Time = 29320ms Time Multiplier = 1.3607264831442771"
+
+const static int SAMPLE_SIZE_HOR = 32;
+const static int SAMPLE_SIZE_VER = 40;
+const static int HOG_WX = 5;
+const static int HOG_WY = 5;
+const static int HOG_BIN = 8;
+SAMPLE_SIZE_HOR / 2, SAMPLE_SIZE_VER / 2
+conf.nTree = 200;
+conf.mtry = 40;
+
