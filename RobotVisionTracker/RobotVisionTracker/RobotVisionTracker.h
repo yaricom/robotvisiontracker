@@ -2032,8 +2032,8 @@ HoG hogoperator;
 
 const static int HOG_WX = 5;
 const static int HOG_WY = 5;
-const static int HOG_BIN = 10;
-FeatureDescriptor descrType = LBP;//HOG;
+const static int HOG_BIN = 8;//10;
+FeatureDescriptor descrType = HOG;//LBP;//
 
 void extractSampleLBP(const VI &img, const int x, const int y, VD &descriptor) {
     VI sample(SAMPLE_SIZE_MULT, 0);
@@ -2049,7 +2049,7 @@ void extractSampleLBP(const VI &img, const int x, const int y, VD &descriptor) {
     int *result = (int *)calloc(256, sizeof(int));
     lbp_histogram(&sample[0], SAMPLE_SIZE_HOR, SAMPLE_SIZE_VER, result, 0);
     for (int i = 0; i < 256; i++) {
-        descriptor.push_back(result[i]);//TODO try normalized here
+        descriptor.push_back(result[i] / 256.0);
     }
 }
 
@@ -2282,6 +2282,9 @@ public:
         // just to be sure
         Assert(640 % SAMPLE_SIZE_HOR == 0, "Wrong horizontal sample");
         Assert(480 % SAMPLE_SIZE_VER == 0, "Wrong vertical sample");
+        
+        // initiate LPB
+//        calculate_points();
     }
     
     int training(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight, const int leftX, const int leftY, const int rightX, const int rightY) {
@@ -2310,8 +2313,8 @@ public:
     VI testing(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight) {
         Printf("Test: %i : %i\n", videoIndex, frameIndex);
         
-        int dx = SAMPLE_SIZE_HOR / 4;
-        int dy = SAMPLE_SIZE_VER / 4;
+        int dx = SAMPLE_SIZE_HOR / 2;
+        int dy = 14;//SAMPLE_SIZE_VER / 2;
         
         Printf("Sliding step dx: %i, dy: %i\n", dx, dy);
         
@@ -2341,8 +2344,8 @@ public:
     int doneTraining() {
         Printf("Frames with OOI: %i, without OOI: %i\n", ooiCount, noOoiCount);
         
-        conf.nTree = 300;//200;
-        conf.mtry = 80;// 60;
+        conf.nTree = 200;//300;//
+        conf.mtry = 40;//80;// 60;
         //        conf.nodesize = 500;
         
         // do train
