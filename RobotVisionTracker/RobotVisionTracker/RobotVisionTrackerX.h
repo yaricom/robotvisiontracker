@@ -1824,6 +1824,11 @@ private:
     }
 };
 
+// holds number of detections
+int trueRoiCount;
+// holds number of
+int falseRoiCounts;
+
 const static int SAMPLE_SIZE_HOR = 32;//2;//8;//16;//32;
 const static int SAMPLE_SIZE_VER = 40;//48;
 const static int SAMPLE_SIZE_MULT = SAMPLE_SIZE_HOR * SAMPLE_SIZE_VER;
@@ -1860,6 +1865,10 @@ void extractSampleHOG(const VI &img, const int x, const int y, VD &descriptor) {
     hogoperator.HOGdescriptor(res, descriptor);
 }
 
+void extractSampleDescriptor(const VI &img, const int x, const int y, VD &descriptor) {
+    extractSampleHOG(img, x, y, descriptor);
+}
+
 void extractLabeledROISamples(const VI &img, const int ooiX, const int ooiY, VVD &features, VD &dv) {
     bool hasOOI = (ooiX > 0 && ooiY > 0);
     int sCount = 0, positives = 0;
@@ -1878,21 +1887,31 @@ void extractLabeledROISamples(const VI &img, const int ooiX, const int ooiY, VVD
             startY = 480 - SAMPLE_SIZE_VER;
         }
         VD sample;
-        extractSampleHOG(img, startX, startY, sample);
+        extractSampleDescriptor(img, startX, startY, sample);
         features.push_back(sample);
         dv.push_back(1.0);
         sCount++;
         positives++;
+        
+        trueRoiCount++;
     } else {
         // false positives
         for (int ys = 0; ys < YSAMPLES; ys++) {
             for (int xs = 0; xs < XSAMPLES; xs++) {
+                if (xs % 2 == 0) {
+                    // count each second
+                    continue;
+                }
                 VD sample;
-                extractSampleHOG(img, xs * SAMPLE_SIZE_HOR, ys * SAMPLE_SIZE_VER, sample);
+                extractSampleDescriptor(img, xs * SAMPLE_SIZE_HOR, ys * SAMPLE_SIZE_VER, sample);
+                
+                //            VD sample = extractSample(img, xs * SAMPLE_SIZE_HOR, ys * SAMPLE_SIZE_VER);
                 features.push_back(sample);
                 // not found
                 dv.push_back(-1.0);
                 sCount++;
+                
+                falseRoiCounts++;
             }
         }
     }
@@ -2122,6 +2141,18 @@ class RobotVisionTrackerX {
     int noOoiCount = 0;
     
 public:
+    RobotVisionTrackerX() {
+        // just to be sure
+        Assert(640 % SAMPLE_SIZE_HOR == 0, "Wrong horizontal sample");
+        Assert(480 % SAMPLE_SIZE_VER == 0, "Wrong vertical sample");
+        
+        trueRoiCount = 0;
+        falseRoiCounts = 0;
+        
+        // initiate LPB
+        //        calculate_points();
+    }
+    
     int training(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight, const int leftX, const int leftY, const int rightX, const int rightY) {
         
         Printf("+Adding training data: %i : %i, left[%i, %i], right[%i, %i]\n", videoIndex, frameIndex, leftX, leftY, rightX, rightY);
@@ -2148,8 +2179,8 @@ public:
     VI testing(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight) {
         Printf("Test: %i : %i\n", videoIndex, frameIndex);
         
-        int dx = 10;//SAMPLE_SIZE_HOR / 2;
-        int dy = 14;//SAMPLE_SIZE_VER / 2;
+        int dx = SAMPLE_SIZE_HOR / 2;
+        int dy = SAMPLE_SIZE_VER / 2;
         
         Printf("Sliding step dx: %i, dy: %i\n", dx, dy);
         
@@ -2177,10 +2208,10 @@ public:
     }
     
     int doneTraining() {
-        Printf("Frames with OOI: %i, without OOI: %i\n", ooiCount, noOoiCount);
+        Printf("Frames with OOI: %i, without OOI: %i, true ROI number: %i, false ROI number: %i\n", ooiCount, noOoiCount, trueRoiCount, falseRoiCounts);
         
-        conf.nTree = 200;//50;//500;
-        conf.mtry = 40;
+        conf.nTree = 300;//
+        conf.mtry = 60;//80;
         //        conf.nodesize = 500;
         
         // do train
