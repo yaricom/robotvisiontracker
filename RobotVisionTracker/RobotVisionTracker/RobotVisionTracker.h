@@ -2049,7 +2049,7 @@ void extractSampleLBP(const VI &img, const int x, const int y, VD &descriptor) {
     int *result = (int *)calloc(256, sizeof(int));
     lbp_histogram(&sample[0], SAMPLE_SIZE_HOR, SAMPLE_SIZE_VER, result, 0);
     for (int i = 0; i < 256; i++) {
-        descriptor.push_back(result[i]);
+        descriptor.push_back(result[i]);//TODO try normalized here
     }
 }
 
@@ -2126,7 +2126,7 @@ void extractLabeledROISamples(const VI &img, const int ooiX, const int ooiY, VVD
     Printf("Extracted %i samples with %i posititves\n", sCount, positives);
 }
 
-void extractROISamples(const VI &img, const int dx, const int dy, VVD &features) {
+void extractSamplesByDescriptors(const VI &img, const int dx, const int dy, VVD &features) {
     int xcount = 640 / dx;
     int ycount = 480 / dy;
     VVD res(ycount, VD(xcount, 0));
@@ -2235,64 +2235,6 @@ void extractLabeledSamples(const VI &img, const int ooiX, const int ooiY, VVD &f
     Printf("Extracted %i samples with %i posititves\n", sCount, positives);
 }
 
-
-void extractSamples(const VI &img, const int ooiX, const int ooiY, VVD &features, VD &dv) {
-    bool hasOOI = (ooiX > 0 && ooiY > 0);
-    int sCount = 0;
-    for (int ys = 0; ys < YSAMPLES; ys++) {
-        for (int xs = 0; xs < XSAMPLES; xs++) {
-            VD sample;
-            extractSampleDescriptor(img, xs * SAMPLE_SIZE_HOR, ys * SAMPLE_SIZE_VER, sample);
-            features.push_back(sample);
-            sCount++;
-            if (hasOOI) {
-                double dxv = (abs(ooiX - xs * SAMPLE_SIZE_HOR - SAMPLE_SIZE_HOR / 2) + 1);
-                double xv = 640.0 / dxv;
-                double yv = 480.0 / (abs(ooiY - ys * SAMPLE_SIZE_VER - SAMPLE_SIZE_VER / 2) + 1);
-                dv.push_back((xv * yv) / 100);
-            } else {
-                // not found
-                dv.push_back(-1.0);
-            }
-        }
-    }
-    Printf("Extracted %i samples\n", sCount);
-}
-
-void sampleImageByHoG(const VI &img, const int ooiX, const int ooiY, VVD &features, VD &dv) {
-    VVD res(480, VD(640, 0));
-    int index = 0;
-    for (int j = 0; j < 480; j++) {
-        VD row(640, 0);
-        copy(img.begin() + index, img.begin() + index + 640, row.begin());
-        index += 640;
-        // add row
-        res[j] = row;
-    }
-    
-    // calculate HOG
-    VD descriptor;
-    hogoperator.wx = HOG_WX;
-    hogoperator.wy = HOG_WY;
-    hogoperator.nbin = HOG_BIN;
-    hogoperator.HOGdescriptor(res, descriptor);
-    
-    
-    bool hasOOI = (ooiX > 0 && ooiY > 0);
-    if (hasOOI) {
-        double xv = round(100.0 * ooiX / 640.0);
-        double yv = ooiY / 480.0;
-        double v = (xv + yv) / 100.0;
-        dv.push_back(v);
-    } else {
-        // not found
-        dv.push_back(-1.0);
-    }
-    features.push_back(descriptor);
-    
-    //    Printf("Sampled %i regions\n", sCount);
-}
-
 pair<int, int>findMaximum(const VD &values) {
     int x = -1, y = -1, index = 0;
     int roiIndex = -1;
@@ -2378,7 +2320,7 @@ public:
         VVD testFeaturesLeft;
 //        VD testDV;
 //        extractLabeledSamples(imageDataLeft, -1, -1, testFeaturesLeft, testDV);
-        extractROISamples(imageDataLeft, dx, dy, testFeaturesLeft);
+        extractSamplesByDescriptors(imageDataLeft, dx, dy, testFeaturesLeft);
         
         VD res = rfLeft.predict(testFeaturesLeft, conf);
         pair<int, int> left = findMaximumBySlidingWindow(res, dx, dy);
@@ -2387,7 +2329,7 @@ public:
         //
         VVD testFeaturesRight;
 //        extractLabeledSamples(imageDataRight, -1, -1, testFeatures, testDV);
-        extractROISamples(imageDataRight, dx, dy, testFeaturesRight);
+        extractSamplesByDescriptors(imageDataRight, dx, dy, testFeaturesRight);
         
         res = rfRight.predict(testFeaturesRight, conf);
         pair<int, int> right = findMaximumBySlidingWindow(res, dx, dy);
