@@ -2021,6 +2021,10 @@ typedef enum _FeatureDescriptor {
     LBP
 }FeatureDescriptor;
 
+// holds number of detections
+int trueRoiCount;
+// holds number of
+int falseRoiCounts;
 
 const static int SAMPLE_SIZE_HOR = 32;//2;//8;//16;//32;
 const static int SAMPLE_SIZE_VER = 24;//48;
@@ -2032,7 +2036,7 @@ HoG hogoperator;
 
 const static int HOG_WX = 5;
 const static int HOG_WY = 5;
-const static int HOG_BIN = 8;//10;
+const static int HOG_BIN = 10;
 FeatureDescriptor descrType = HOG;//LBP;//
 
 void extractSampleLBP(const VI &img, const int x, const int y, VD &descriptor) {
@@ -2108,10 +2112,16 @@ void extractLabeledROISamples(const VI &img, const int ooiX, const int ooiY, VVD
         dv.push_back(1.0);
         sCount++;
         positives++;
+        
+        trueRoiCount++;
     } else {
         // false positives
         for (int ys = 0; ys < YSAMPLES; ys++) {
             for (int xs = 0; xs < XSAMPLES; xs++) {
+                if (xs % 2 == 0) {
+                    // count each second
+                    continue;
+                }
                 VD sample;
                 extractSampleDescriptor(img, xs * SAMPLE_SIZE_HOR, ys * SAMPLE_SIZE_VER, sample);
                 
@@ -2120,6 +2130,8 @@ void extractLabeledROISamples(const VI &img, const int ooiX, const int ooiY, VVD
                 // not found
                 dv.push_back(-1.0);
                 sCount++;
+                
+                falseRoiCounts++;
             }
         }
     }
@@ -2283,6 +2295,9 @@ public:
         Assert(640 % SAMPLE_SIZE_HOR == 0, "Wrong horizontal sample");
         Assert(480 % SAMPLE_SIZE_VER == 0, "Wrong vertical sample");
         
+        trueRoiCount = 0;
+        falseRoiCounts = 0;
+        
         // initiate LPB
 //        calculate_points();
     }
@@ -2313,8 +2328,8 @@ public:
     VI testing(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight) {
         Printf("Test: %i : %i\n", videoIndex, frameIndex);
         
-        int dx = SAMPLE_SIZE_HOR / 2;
-        int dy = 14;//SAMPLE_SIZE_VER / 2;
+        int dx = SAMPLE_SIZE_HOR / 4;
+        int dy = SAMPLE_SIZE_VER / 4;
         
         Printf("Sliding step dx: %i, dy: %i\n", dx, dy);
         
@@ -2342,10 +2357,10 @@ public:
     }
     
     int doneTraining() {
-        Printf("Frames with OOI: %i, without OOI: %i\n", ooiCount, noOoiCount);
+        Printf("Frames with OOI: %i, without OOI: %i, true ROI number: %i, false ROI number: %i\n", ooiCount, noOoiCount, trueRoiCount, falseRoiCounts);
         
-        conf.nTree = 200;//300;//
-        conf.mtry = 40;//80;// 60;
+        conf.nTree = 300;//
+        conf.mtry = 60;//80;
         //        conf.nodesize = 500;
         
         // do train
