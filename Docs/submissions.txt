@@ -29,7 +29,7 @@ SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 4
 conf.nTree = 300;
 conf.mtry = 80;
 
-Test Complete: RobotVisionTracker example submission 40
+Test Complete: RobotVisionTracker example submission 40 (138209.29 - Test Complete: RobotVisionTracker submission 19)
 =========================================================
 0) Score: 474715.50086569955 Run Time: 773730 ms Peak Memory Used: 1694.457MB
 
