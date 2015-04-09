@@ -2026,8 +2026,8 @@ int trueRoiCount;
 // holds number of
 int falseRoiCounts;
 
-const static int SAMPLE_SIZE_HOR = 32;//2;//8;//16;//32;
-const static int SAMPLE_SIZE_VER = 24;//48;
+const static int SAMPLE_SIZE_HOR = 20;//32;//2;//8;//16;//32;
+const static int SAMPLE_SIZE_VER = 20;//24;//48;
 const static int SAMPLE_SIZE_MULT = SAMPLE_SIZE_HOR * SAMPLE_SIZE_VER;
 const static int XSAMPLES = 640 / SAMPLE_SIZE_HOR;
 const static int YSAMPLES = 480 / SAMPLE_SIZE_VER;
@@ -2359,7 +2359,7 @@ public:
     int doneTraining() {
         Printf("Frames with OOI: %i, without OOI: %i, true ROI number: %i, false ROI number: %i\n", ooiCount, noOoiCount, trueRoiCount, falseRoiCounts);
         
-        conf.nTree = 300;//
+        conf.nTree = 200;//300;//
         conf.mtry = 60;//80;
         //        conf.nodesize = 500;
         
