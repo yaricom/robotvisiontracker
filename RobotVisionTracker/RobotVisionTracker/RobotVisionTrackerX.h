@@ -1839,7 +1839,7 @@ HoG hogoperator;
 
 const static int HOG_WX = 5;
 const static int HOG_WY = 5;
-const static int HOG_BIN = 8;
+const static int HOG_BIN = 6;//8;
 
 void extractSampleHOG(const VI &img, const int x, const int y, VD &descriptor) {
     VVD res(SAMPLE_SIZE_VER, VD(SAMPLE_SIZE_HOR, 0));
@@ -2179,8 +2179,8 @@ public:
     VI testing(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight) {
         Printf("Test: %i : %i\n", videoIndex, frameIndex);
         
-        int dx = SAMPLE_SIZE_HOR / 3;//2;
-        int dy = SAMPLE_SIZE_VER / 3;//2;
+        int dx = SAMPLE_SIZE_HOR / 2;
+        int dy = SAMPLE_SIZE_VER / 2;
         
         Printf("Sliding step dx: %i, dy: %i\n", dx, dy);
         
@@ -2211,7 +2211,7 @@ public:
         Printf("Frames with OOI: %i, without OOI: %i, true ROI number: %i, false ROI number: %i\n", ooiCount, noOoiCount, trueRoiCount, falseRoiCounts);
         
         conf.nTree = 300;//
-        conf.mtry = 60;//80;
+        conf.mtry = 50;//60;//80;
         //        conf.nodesize = 500;
         
         // do train
