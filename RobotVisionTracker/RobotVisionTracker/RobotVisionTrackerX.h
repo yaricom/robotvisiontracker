@@ -63,7 +63,7 @@ inline void Printf(const char *fmt, ...) {
         va_start(args, fmt);
         vsnprintf(&msg[0], kPrintBuffer, fmt, args);
         va_end(args);
-        fprintf(stderr, "%s", msg.c_str());
+        fprintf(stdout, "%s", msg.c_str());
     }
 }
 
@@ -2179,8 +2179,8 @@ public:
     VI testing(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight) {
         Printf("Test: %i : %i\n", videoIndex, frameIndex);
         
-        int dx = SAMPLE_SIZE_HOR / 2;
-        int dy = SAMPLE_SIZE_VER / 2;
+        int dx = SAMPLE_SIZE_HOR / 3;//2;
+        int dy = SAMPLE_SIZE_VER / 3;//2;
         
         Printf("Sliding step dx: %i, dy: %i\n", dx, dy);
         
