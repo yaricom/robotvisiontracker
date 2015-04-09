@@ -2027,7 +2027,7 @@ int trueRoiCount;
 int falseRoiCounts;
 
 const static int SAMPLE_SIZE_HOR = 32;//2;//8;//16;//32;
-const static int SAMPLE_SIZE_VER = 20;//24;//48;
+const static int SAMPLE_SIZE_VER = 40;//24;//48;
 const static int SAMPLE_SIZE_MULT = SAMPLE_SIZE_HOR * SAMPLE_SIZE_VER;
 const static int XSAMPLES = 640 / SAMPLE_SIZE_HOR;
 const static int YSAMPLES = 480 / SAMPLE_SIZE_VER;
@@ -2327,8 +2327,8 @@ public:
     VI testing(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight) {
         Printf("Test: %i : %i\n", videoIndex, frameIndex);
         
-        int dx = SAMPLE_SIZE_HOR / 4;
-        int dy = SAMPLE_SIZE_VER / 4;
+        int dx = SAMPLE_SIZE_HOR / 2;//4;
+        int dy = SAMPLE_SIZE_VER / 2;//4;
         
         Printf("Sliding step dx: %i, dy: %i\n", dx, dy);
         
