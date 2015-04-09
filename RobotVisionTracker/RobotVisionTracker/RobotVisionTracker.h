@@ -2026,7 +2026,7 @@ int trueRoiCount;
 // holds number of
 int falseRoiCounts;
 
-const static int SAMPLE_SIZE_HOR = 20;//32;//2;//8;//16;//32;
+const static int SAMPLE_SIZE_HOR = 32;//2;//8;//16;//32;
 const static int SAMPLE_SIZE_VER = 20;//24;//48;
 const static int SAMPLE_SIZE_MULT = SAMPLE_SIZE_HOR * SAMPLE_SIZE_VER;
 const static int XSAMPLES = 640 / SAMPLE_SIZE_HOR;
@@ -2120,18 +2120,17 @@ void extractLabeledROISamples(const VI &img, const int ooiX, const int ooiY, VVD
             for (int xs = 0; xs < XSAMPLES; xs++) {
                 if (xs % 2 == 0) {
                     // count each second
-                    continue;
+                    VD sample;
+                    extractSampleDescriptor(img, xs * SAMPLE_SIZE_HOR, ys * SAMPLE_SIZE_VER, sample);
+                    
+                    //            VD sample = extractSample(img, xs * SAMPLE_SIZE_HOR, ys * SAMPLE_SIZE_VER);
+                    features.push_back(sample);
+                    // not found
+                    dv.push_back(-1.0);
+                    sCount++;
+                    
+                    falseRoiCounts++;
                 }
-                VD sample;
-                extractSampleDescriptor(img, xs * SAMPLE_SIZE_HOR, ys * SAMPLE_SIZE_VER, sample);
-                
-                //            VD sample = extractSample(img, xs * SAMPLE_SIZE_HOR, ys * SAMPLE_SIZE_VER);
-                features.push_back(sample);
-                // not found
-                dv.push_back(-1.0);
-                sCount++;
-                
-                falseRoiCounts++;
             }
         }
     }
@@ -2357,9 +2356,10 @@ public:
     }
     
     int doneTraining() {
-        Printf("Frames with OOI: %i, without OOI: %i, true ROI number: %i, false ROI number: %i\n", ooiCount, noOoiCount, trueRoiCount, falseRoiCounts);
+        Printf("Frames with OOI: %i, without OOI: %i,\ntrue ROI number: %i, false ROI number: %i, total samples: %i\n",
+               ooiCount, noOoiCount, trueRoiCount, falseRoiCounts, (int)trainLeftFeatures.size());
         
-        conf.nTree = 200;//300;//
+        conf.nTree = 300;//
         conf.mtry = 60;//80;
         //        conf.nodesize = 500;
         

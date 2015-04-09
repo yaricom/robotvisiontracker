@@ -148,12 +148,28 @@ Test Complete: RobotVisionTracker example submission 50
 
  Process exceeded the time limit Error, incorrect number of elements in testing method return."
 
-const static int SAMPLE_SIZE_HOR = 32;
-const static int SAMPLE_SIZE_VER = 24;
+const static int SAMPLE_SIZE_HOR = 20;
+const static int SAMPLE_SIZE_VER = 20;
 const static int HOG_WX = 5;
 const static int HOG_WY = 5;
 const static int HOG_BIN = 10;
 FeatureDescriptor descrType = HOG;
+SAMPLE_SIZE_HOR / 4;SAMPLE_SIZE_VER / 4;
+conf.nTree = 300;//
+conf.mtry = 60;
+
+
+Test Complete: RobotVisionTracker example submission 53
+=========================================================
+0) Score: 391000.0 Run Time: 871313 ms Peak Memory Used: 539.418MB
+
+ Accuracy Score = 391000.0 Processing Time = 134549ms Time Multiplier = 1.0"
+const static int SAMPLE_SIZE_HOR = 32;
+const static int SAMPLE_SIZE_VER = 20;
+const static int HOG_WX = 5;
+const static int HOG_WY = 5;
+const static int HOG_BIN = 10;
+FeatureDescriptor descrType = HOG;//LBP;//
 SAMPLE_SIZE_HOR / 4;SAMPLE_SIZE_VER / 4;
 conf.nTree = 300;//
 conf.mtry = 60;
