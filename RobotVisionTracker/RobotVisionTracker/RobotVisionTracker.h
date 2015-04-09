@@ -2016,18 +2016,23 @@ void lbp_histogram(int* img, int rows, int columns, int* result, int interpolate
 
 
 //=============================================================================================
+//=============================================================================================
+//=============================================================================================
+//=============================================================================================
 typedef enum _FeatureDescriptor {
     HOG,
     LBP
 }FeatureDescriptor;
 
+// The flag to indicate whether to not shrink false ROI samples count
+bool acceptAllFalseRoi = false;//true;
 // holds number of detections
 int trueRoiCount;
 // holds number of
 int falseRoiCounts;
 
 const static int SAMPLE_SIZE_HOR = 32;//2;//8;//16;//32;
-const static int SAMPLE_SIZE_VER = 40;//24;//48;
+const static int SAMPLE_SIZE_VER = 24;//24;//48;
 const static int SAMPLE_SIZE_MULT = SAMPLE_SIZE_HOR * SAMPLE_SIZE_VER;
 const static int XSAMPLES = 640 / SAMPLE_SIZE_HOR;
 const static int YSAMPLES = 480 / SAMPLE_SIZE_VER;
@@ -2036,7 +2041,7 @@ HoG hogoperator;
 
 const static int HOG_WX = 5;
 const static int HOG_WY = 5;
-const static int HOG_BIN = 10;
+const static int HOG_BIN = 12;
 FeatureDescriptor descrType = HOG;//LBP;//
 
 void extractSampleLBP(const VI &img, const int x, const int y, VD &descriptor) {
@@ -2118,7 +2123,7 @@ void extractLabeledROISamples(const VI &img, const int ooiX, const int ooiY, VVD
         // false positives
         for (int ys = 0; ys < YSAMPLES; ys++) {
             for (int xs = 0; xs < XSAMPLES; xs++) {
-                if (xs % 2 == 0) {
+                if (acceptAllFalseRoi || xs % 2 == 0) {
                     // count each second
                     VD sample;
                     extractSampleDescriptor(img, xs * SAMPLE_SIZE_HOR, ys * SAMPLE_SIZE_VER, sample);
@@ -2327,8 +2332,8 @@ public:
     VI testing(const int videoIndex, const int frameIndex, const VI &imageDataLeft, const VI &imageDataRight) {
         Printf("Test: %i : %i\n", videoIndex, frameIndex);
         
-        int dx = SAMPLE_SIZE_HOR / 2;//4;
-        int dy = SAMPLE_SIZE_VER / 2;//4;
+        int dx = SAMPLE_SIZE_HOR / 4;
+        int dy = SAMPLE_SIZE_VER / 4;
         
         Printf("Sliding step dx: %i, dy: %i\n", dx, dy);
         
