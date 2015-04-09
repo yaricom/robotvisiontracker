@@ -191,6 +191,45 @@ conf.nTree = 300;//
 conf.mtry = 60;
 
 
+Test Complete: RobotVisionTracker example submission 55
+=========================================================
+
+0) Score: 379000.0 Run Time: 717801 ms Peak Memory Used: 459.676MB
+
+ Accuracy Score = 379000.0 Processing Time = 134413ms Time Multiplier = 1.0"
+
+const static int SAMPLE_SIZE_HOR = 32;
+const static int SAMPLE_SIZE_VER = 24;
+const static int HOG_WX = 5;
+const static int HOG_WY = 5;
+const static int HOG_BIN = 10;
+FeatureDescriptor descrType = HOG;
+SAMPLE_SIZE_HOR / 4;SAMPLE_SIZE_VER / 4;
+conf.nTree = 300;//
+conf.mtry = 60;
+
+false ROI skipping per %2
+
+Test Complete: RobotVisionTracker example submission 56 (267600.0 - Test Complete: RobotVisionTracker submission 26)
+=========================================================
+0) Score: 495999.99999999994 Run Time: 802611 ms Peak Memory Used: 474.887MB
+
+ Accuracy Score = 495999.99999999994 Processing Time = 153917ms Time Multiplier = 1.0"
+
+const static int SAMPLE_SIZE_HOR = 32;
+const static int SAMPLE_SIZE_VER = 24;
+const static int HOG_WX = 5;
+const static int HOG_WY = 5;
+const static int HOG_BIN = 12;
+FeatureDescriptor descrType = HOG;
+SAMPLE_SIZE_HOR / 4;SAMPLE_SIZE_VER / 4;
+conf.nTree = 300;//
+conf.mtry = 60;
+
+false ROI skipping per %2
+
+
+
 Test Complete: RobotVisionTracker example submission 39
 =========================================================
 0) Score: 450000.0 Run Time: 2736522 ms Peak Memory Used: 1009.012MB
@@ -282,7 +321,13 @@ SAMPLE_SIZE_HOR / 4, SAMPLE_SIZE_VER / 3
 conf.nTree = 300;
 conf.mtry = 80;
 
+
+
+
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
 
 Test Complete: RobotVisionTrackerX example submission 9
 =========================================================
@@ -424,3 +469,19 @@ const static int HOG_BIN = 10;//8;
 SAMPLE_SIZE_HOR / 2;SAMPLE_SIZE_VER / 2;
 conf.nTree = 300;//
 conf.mtry = 60;
+
+
+Test Complete: RobotVisionTrackerX example submission 18 (448279.82 - Test Complete: RobotVisionTrackerX submission 10)
+=========================================================
+0) Score: 253802.57805350484 Run Time: 1756606 ms Peak Memory Used: 977.242MB
+
+ Accuracy Score = 186000.0 Processing Time = 28943ms Time Multiplier = 1.3645299895349723"
+
+const static int SAMPLE_SIZE_HOR = 32;
+const static int SAMPLE_SIZE_VER = 40;
+const static int HOG_WX = 5;
+const static int HOG_WY = 5;
+const static int HOG_BIN = 6;
+SAMPLE_SIZE_HOR / 2;SAMPLE_SIZE_VER / 2;
+conf.nTree = 300;//
+conf.mtry = 50;
