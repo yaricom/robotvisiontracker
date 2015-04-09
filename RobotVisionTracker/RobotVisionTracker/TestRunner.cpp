@@ -253,6 +253,8 @@ public:
             
             VI ret = task->testing(videoIndex, frameIndex, aFrame.leftImg, aFrame.rightImg);
             
+            Assert(ret.size() == 4, "Wrong number of coordinates returned from testing method: %i", (int)ret.size());
+            
             // store values
             userLeftX[f] = ret[0];
             userLeftY[f] = ret[1];
