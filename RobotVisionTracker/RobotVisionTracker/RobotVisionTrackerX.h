@@ -1824,10 +1824,14 @@ private:
     }
 };
 
+// The flag to indicate whether to not shrink false ROI samples count
+bool acceptAllFalseRoi = false;//true;
 // holds number of detections
 int trueRoiCount;
 // holds number of
 int falseRoiCounts;
+
+MT_RNG rng;
 
 const static int SAMPLE_SIZE_HOR = 32;//2;//8;//16;//32;
 const static int SAMPLE_SIZE_VER = 40;//48;
@@ -1839,7 +1843,7 @@ HoG hogoperator;
 
 const static int HOG_WX = 5;
 const static int HOG_WY = 5;
-const static int HOG_BIN = 6;//8;
+const static int HOG_BIN = 8;
 
 void extractSampleHOG(const VI &img, const int x, const int y, VD &descriptor) {
     VVD res(SAMPLE_SIZE_VER, VD(SAMPLE_SIZE_HOR, 0));
@@ -1898,7 +1902,7 @@ void extractLabeledROISamples(const VI &img, const int ooiX, const int ooiY, VVD
         // false positives
         for (int ys = 0; ys < YSAMPLES; ys++) {
             for (int xs = 0; xs < XSAMPLES; xs++) {
-                if (xs % 2 == 0) {
+                if (acceptAllFalseRoi || rng.unif_rand() > 0.3) {
                     // count each second
                     continue;
                 }
@@ -2211,7 +2215,7 @@ public:
         Printf("Frames with OOI: %i, without OOI: %i, true ROI number: %i, false ROI number: %i\n", ooiCount, noOoiCount, trueRoiCount, falseRoiCounts);
         
         conf.nTree = 300;//
-        conf.mtry = 50;//60;//80;
+        conf.mtry = 60;//80;
         //        conf.nodesize = 500;
         
         // do train
