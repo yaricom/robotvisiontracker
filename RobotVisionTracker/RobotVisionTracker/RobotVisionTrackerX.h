@@ -1844,6 +1844,7 @@ HoG hogoperator;
 const static int HOG_WX = 5;
 const static int HOG_WY = 5;
 const static int HOG_BIN = 8;
+float rndFactor = 0.1;
 
 void extractSampleHOG(const VI &img, const int x, const int y, VD &descriptor) {
     VVD res(SAMPLE_SIZE_VER, VD(SAMPLE_SIZE_HOR, 0));
@@ -1902,7 +1903,7 @@ void extractLabeledROISamples(const VI &img, const int ooiX, const int ooiY, VVD
         // false positives
         for (int ys = 0; ys < YSAMPLES; ys++) {
             for (int xs = 0; xs < XSAMPLES; xs++) {
-                if (acceptAllFalseRoi || rng.unif_rand() > 0.3) {
+                if (acceptAllFalseRoi || rng.unif_rand() > rndFactor) {
                     // count each second
                     continue;
                 }
