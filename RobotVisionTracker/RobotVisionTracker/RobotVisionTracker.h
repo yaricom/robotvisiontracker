@@ -2024,6 +2024,8 @@ typedef enum _FeatureDescriptor {
     LBP
 }FeatureDescriptor;
 
+MT_RNG rng;
+
 // The flag to indicate whether to not shrink false ROI samples count
 bool acceptAllFalseRoi = false;//true;
 // holds number of detections
@@ -2041,7 +2043,7 @@ HoG hogoperator;
 
 const static int HOG_WX = 5;
 const static int HOG_WY = 5;
-const static int HOG_BIN = 12;
+const static int HOG_BIN = 10;
 FeatureDescriptor descrType = HOG;//LBP;//
 
 void extractSampleLBP(const VI &img, const int x, const int y, VD &descriptor) {
@@ -2123,7 +2125,7 @@ void extractLabeledROISamples(const VI &img, const int ooiX, const int ooiY, VVD
         // false positives
         for (int ys = 0; ys < YSAMPLES; ys++) {
             for (int xs = 0; xs < XSAMPLES; xs++) {
-                if (acceptAllFalseRoi || xs % 2 == 0) {
+                if (acceptAllFalseRoi || rng.unif_rand() > 0.4) {
                     // count each second
                     VD sample;
                     extractSampleDescriptor(img, xs * SAMPLE_SIZE_HOR, ys * SAMPLE_SIZE_VER, sample);
@@ -2364,8 +2366,8 @@ public:
         Printf("Frames with OOI: %i, without OOI: %i,\ntrue ROI number: %i, false ROI number: %i, total samples: %i\n",
                ooiCount, noOoiCount, trueRoiCount, falseRoiCounts, (int)trainLeftFeatures.size());
         
-        conf.nTree = 300;//
-        conf.mtry = 60;//80;
+        conf.nTree = 200;//
+        conf.mtry = 50;//60;//80;
         //        conf.nodesize = 500;
         
         // do train
