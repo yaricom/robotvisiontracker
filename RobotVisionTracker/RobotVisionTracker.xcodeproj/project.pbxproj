@@ -35,6 +35,7 @@
 		7855F2001AD47FB20005CD92 /* LBP.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LBP.h; sourceTree = "<group>"; };
 		786CFB341AD0793D00B2900F /* RobotVisionTrackerX.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RobotVisionTrackerX.h; sourceTree = "<group>"; };
 		78BB17B01ACEF0100057AB26 /* onlineSVM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = onlineSVM.h; sourceTree = "<group>"; };
+		78DBA12F1AD800A900CB7A4C /* RobotVisionTracker1.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RobotVisionTracker1.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,6 +75,7 @@
 				7815CE191AC9910300BE0EA1 /* RobotVisionTracker.h */,
 				786CFB341AD0793D00B2900F /* RobotVisionTrackerX.h */,
 				7849A9251AC9D0F800F68AD3 /* TestRunner.cpp */,
+				78DBA12F1AD800A900CB7A4C /* RobotVisionTracker1.h */,
 				78BB17B01ACEF0100057AB26 /* onlineSVM.h */,
 			);
 			path = RobotVisionTracker;

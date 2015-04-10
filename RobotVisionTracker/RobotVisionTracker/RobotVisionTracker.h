@@ -2045,6 +2045,7 @@ const static int HOG_WX = 5;
 const static int HOG_WY = 5;
 const static int HOG_BIN = 10;
 FeatureDescriptor descrType = HOG;//LBP;//
+float rndFactor = 0.2;
 
 void extractSampleLBP(const VI &img, const int x, const int y, VD &descriptor) {
     VI sample(SAMPLE_SIZE_MULT, 0);
@@ -2125,7 +2126,7 @@ void extractLabeledROISamples(const VI &img, const int ooiX, const int ooiY, VVD
         // false positives
         for (int ys = 0; ys < YSAMPLES; ys++) {
             for (int xs = 0; xs < XSAMPLES; xs++) {
-                if (acceptAllFalseRoi || rng.unif_rand() > 0.4) {
+                if (acceptAllFalseRoi || rng.unif_rand() > rndFactor) {
                     // count each second
                     VD sample;
                     extractSampleDescriptor(img, xs * SAMPLE_SIZE_HOR, ys * SAMPLE_SIZE_VER, sample);
@@ -2367,7 +2368,7 @@ public:
                ooiCount, noOoiCount, trueRoiCount, falseRoiCounts, (int)trainLeftFeatures.size());
         
         conf.nTree = 200;//
-        conf.mtry = 50;//60;//80;
+        conf.mtry = 60;//80;
         //        conf.nodesize = 500;
         
         // do train
